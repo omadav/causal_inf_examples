@@ -24,8 +24,15 @@ docs/
   module-b.html               Módulo B (ancla numérica, 5 ítems)
   module-c.html               Módulo C (tranvía + heterogeneidad)
   GOOGLE_FORMS_SETUP.md       cómo cablear el backend de datos
-analysis/                     notebooks para la sesión en vivo (pendiente)
+analysis/
+  session.ipynb               notebook para correr en clase (balance, ATE, CATE)
+  requirements.txt            pip install -r analysis/requirements.txt
+  data/                       module_a.csv, module_b.csv, module_c.csv (exportar de Sheets antes de la clase)
 ```
+
+`session.ipynb` corre hoy mismo con datos simulados (`SIMULATE = True`,
+marcados como tales en la salida) para probar el flujo antes de la clase
+real; apenas existan los 3 CSV en `analysis/data/` usa esos automáticamente.
 
 Las páginas son HTML/CSS/JS puro (sin frameworks), pensadas para
 **GitHub Pages**: públicas, sin login, sirven desde `/docs` en esta rama.
@@ -36,6 +43,6 @@ cálculo para leer en vivo durante la clase.
 ## Estado
 
 - [x] Las 3 páginas (diseño, aleatorización, validaciones)
-- [ ] Crear los 3 Google Forms y cablear `FORM_CONFIG` en cada página
-- [ ] Activar GitHub Pages sobre esta rama, carpeta `/docs`
-- [ ] Notebook de análisis en vivo (balance de covariables, ATE, CATE)
+- [x] Activar GitHub Pages sobre esta rama, carpeta `/docs`
+- [x] Notebook de análisis en vivo (balance de covariables, ATE, CATE) — probado con datos simulados
+- [ ] Crear los 3 Google Forms y cablear `FORM_CONFIG` en cada página (bloqueante: sin esto no se guarda ninguna respuesta real)
