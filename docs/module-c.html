@@ -215,17 +215,13 @@
   // Ver docs/GOOGLE_FORMS_SETUP.md para crear el formulario y obtener
   // la URL de acción y los entry.NNNNNN de cada campo.
   // ------------------------------------------------------------------
+  // Un solo Google Form, compartido por los 3 módulos, con solo 2 preguntas:
+  // "modulo" (A/B/C) y "payload_json" (todas las respuestas, como JSON).
   const FORM_CONFIG = {
     action: "REEMPLAZA_CON_TU_FORM_ACTION_URL",
     entries: {
-      variante:          "REEMPLAZA_ENTRY_ID",
-      aceptabilidad:     "REEMPLAZA_ENTRY_ID",
-      genero:            "REEMPLAZA_ENTRY_ID",
-      religiosidad:      "REEMPLAZA_ENTRY_ID",
-      practica_religion: "REEMPLAZA_ENTRY_ID",
-      tipi_json:         "REEMPLAZA_ENTRY_ID",
-      submission_id:     "REEMPLAZA_ENTRY_ID",
-      modulo:            "REEMPLAZA_ENTRY_ID"
+      modulo:       "REEMPLAZA_ENTRY_ID",
+      payload_json: "REEMPLAZA_ENTRY_ID"
     }
   };
 
@@ -341,15 +337,14 @@
     }
     document.getElementById('err-tipi').style.display = 'none';
 
-    const payload = {
+    const data = {
       variante: variantKey,
       aceptabilidad: radioVal('accept'),
       genero: radioVal('genero'),
       religiosidad: radioVal('relig'),
       practica_religion: radioVal('practica'),
       tipi_json: JSON.stringify(tipiAnswers),
-      submission_id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
-      modulo: 'C'
+      submission_id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()
     };
 
     const btn = document.getElementById('btn-submit');
@@ -357,12 +352,11 @@
 
     try{
       if (FORM_CONFIG.action.startsWith('REEMPLAZA')){
-        console.warn('FORM_CONFIG sin configurar todavía — la respuesta no se envió a ningún formulario.', payload);
+        console.warn('FORM_CONFIG sin configurar todavía — la respuesta no se envió a ningún formulario.', data);
       } else {
         const params = new URLSearchParams();
-        Object.entries(FORM_CONFIG.entries).forEach(([key, entryId]) => {
-          if (payload[key] !== undefined) params.append(entryId, payload[key]);
-        });
+        params.append(FORM_CONFIG.entries.modulo, 'C');
+        params.append(FORM_CONFIG.entries.payload_json, JSON.stringify(data));
         await fetch(FORM_CONFIG.action, { method: 'POST', mode: 'no-cors', body: params });
       }
     } catch(e){
