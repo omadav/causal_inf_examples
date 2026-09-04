@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Experimentos de inferencia causal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F3F0; --panel:#FFFFFF; --ink:#1E2624; --ink-soft:#5B6360; --line:#DEDBD2;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#14161A; --panel:#1B1E23; --ink:#ECEEEA; --ink-soft:#9AA29D; --line:#2B2F33; }
+  }
+  :root[data-theme="dark"]{ --bg:#14161A; --panel:#1B1E23; --ink:#ECEEEA; --ink-soft:#9AA29D; --line:#2B2F33; }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--ink); margin:0;
+    font-family:'Public Sans',-apple-system,'Segoe UI',sans-serif;
+    display:flex; justify-content:center; padding:40px 16px 60px;
+  }
+  .stage{width:100%; max-width:640px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--ink-soft); font-weight:600;
+  }
+  h1{font-family:'Fraunces',Georgia,serif; font-weight:600; font-size:32px; margin:10px 0 8px; text-wrap:balance;}
+  p.lead{color:var(--ink-soft); margin:0 0 28px; line-height:1.6; max-width:52ch;}
+  .grid{display:grid; gap:14px;}
+  a.card{
+    display:block; background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:20px 20px 18px; text-decoration:none; color:var(--ink);
+    border-left:4px solid var(--dot);
+  }
+  a.card .tag{font-family:'IBM Plex Mono',monospace; font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft);}
+  a.card h2{font-family:'Fraunces',Georgia,serif; font-weight:600; font-size:20px; margin:6px 0 6px;}
+  a.card p{margin:0; color:var(--ink-soft); font-size:14px; line-height:1.5;}
+  .a{--dot:#2B6E6B;} .b{--dot:#B9862A;} .c{--dot:#6E4A76;}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="eyebrow">Curso · Inferencia causal</div>
+  <h1>Tres experimentos, un día de clase</h1>
+  <p class="lead">Escanea o abre cada módulo cuando tu profesor lo indique. Las respuestas son anónimas.</p>
+  <div class="grid">
+    <a class="card a" href="module-a.html">
+      <div class="tag">Módulo A</div>
+      <h2>El precio arbitrario</h2>
+      <p>Tu RUT y cuánto pagarías por dos objetos.</p>
+    </a>
+    <a class="card b" href="module-b.html">
+      <div class="tag">Módulo B</div>
+      <h2>El ancla numérica</h2>
+      <p>Cinco personajes históricos, cinco edades a estimar.</p>
+    </a>
+    <a class="card c" href="module-c.html">
+      <div class="tag">Módulo C</div>
+      <h2>El dilema y tú</h2>
+      <p>Un dilema moral y algunas preguntas sobre ti.</p>
+    </a>
+  </div>
+</div>
+</body>
+</html>

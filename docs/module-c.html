@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Módulo C · El dilema y tú</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F3F5; --panel:#FFFFFF; --panel-2:#F9F6F9;
+    --ink:#241E27; --ink-soft:#605868; --line:#DED6DE;
+    --accent:#6E4A76; --accent-ink:#4A2E52; --accent-contrast:#FFFFFF;
+    --danger:#A23B2E; --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#181419; --panel:#211B24; --panel-2:#261F2A;
+      --ink:#EFE9F0; --ink-soft:#AB9FB2; --line:#352C3B;
+      --accent:#B78BC0; --accent-ink:#F4E4F7; --accent-contrast:#241123;
+      --danger:#E08A79;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#181419; --panel:#211B24; --panel-2:#261F2A;
+    --ink:#EFE9F0; --ink-soft:#AB9FB2; --line:#352C3B;
+    --accent:#B78BC0; --accent-ink:#F4E4F7; --accent-contrast:#241123;
+    --danger:#E08A79;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'Public Sans',-apple-system,'Segoe UI',sans-serif;
+    display:flex; justify-content:center; padding:28px 14px 56px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .stage{width:100%; max-width:520px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--accent-ink); font-weight:600;
+  }
+  .rule{height:2px; background:var(--accent); width:38px; margin:10px 0 18px; border-radius:2px;}
+  .dots{display:flex; gap:6px; margin-bottom:20px;}
+  .dot{width:22px; height:4px; border-radius:2px; background:var(--line);}
+  .dot.done{background:var(--accent);}
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:26px 22px 20px; box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  h1{
+    font-family:'Fraunces',Georgia,serif; font-weight:600; font-size:27px;
+    line-height:1.15; margin:0 0 12px; text-wrap:balance;
+  }
+  p{margin:0 0 14px; line-height:1.55; color:var(--ink);}
+  p.soft{color:var(--ink-soft); font-size:14.5px;}
+  .vignette{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:10px;
+    padding:16px 17px; margin-bottom:18px; font-size:15px; line-height:1.6;
+  }
+  label.field-label{display:block; font-size:14px; font-weight:600; margin:0 0 8px;}
+  fieldset{border:none; padding:0; margin:0 0 8px;}
+  .opt{
+    display:flex; align-items:center; gap:10px; padding:12px 13px;
+    border:1.5px solid var(--line); border-radius:10px; margin-bottom:8px; cursor:pointer;
+  }
+  .opt input{width:16px; height:16px; accent-color:var(--accent); margin:0;}
+  .opt.checked{border-color:var(--accent); background:var(--panel-2);}
+  .scale7{display:flex; gap:4px;}
+  .scale7 label{
+    flex:1; text-align:center; border:1.5px solid var(--line); border-radius:7px;
+    padding:9px 0; font-family:'IBM Plex Mono',monospace; font-size:13px; cursor:pointer;
+  }
+  .scale7 input{position:absolute; opacity:0; pointer-events:none;}
+  .scale7 label.checked{border-color:var(--accent); background:var(--accent); color:var(--accent-contrast);}
+  .scale-caps{display:flex; justify-content:space-between; font-size:11px; color:var(--ink-soft); margin-top:6px;}
+  .tipi-item{margin-bottom:18px;}
+  .tipi-item p{margin-bottom:8px; font-size:14.5px;}
+  .consent-row{display:flex; gap:10px; align-items:flex-start; margin:18px 0 6px; cursor:pointer;}
+  .consent-row input{margin-top:3px; width:17px; height:17px; accent-color:var(--accent);}
+  .nav{display:flex; justify-content:space-between; align-items:center; margin-top:22px;}
+  button{
+    font-family:'Public Sans',sans-serif; font-weight:600; font-size:15px;
+    border-radius:10px; padding:12px 20px; border:1.5px solid transparent; cursor:pointer;
+  }
+  .btn-primary{background:var(--accent); color:var(--accent-contrast);}
+  .btn-primary:disabled{opacity:.4; cursor:not-allowed;}
+  .btn-ghost{background:transparent; color:var(--ink-soft); border-color:var(--line);}
+  .step{display:none;}
+  .step.active{display:block;}
+  .done-screen{text-align:center; padding:30px 6px;}
+  .stamp{
+    display:inline-flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace;
+    font-size:13px; font-weight:600; letter-spacing:.06em; color:var(--accent-ink);
+    border:1.5px solid var(--accent); border-radius:999px; padding:6px 14px; margin-bottom:18px;
+  }
+  .err{color:var(--danger); font-size:13px; margin-top:-2px; margin-bottom:12px; display:none;}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="eyebrow">Protocolo · Módulo C</div>
+  <div class="rule"></div>
+
+  <!-- STEP 0: consent -->
+  <div class="step active" data-step="0">
+    <div class="card">
+      <h1>El dilema y tú</h1>
+      <p>Vas a leer un breve dilema moral y dar tu opinión, luego un par de preguntas sobre ti. Es un ejercicio de la clase de inferencia causal — no evaluamos si tu respuesta es "correcta".</p>
+      <p class="soft">Tus respuestas son anónimas. Tiempo estimado: 3 minutos.</p>
+      <label class="consent-row">
+        <input type="checkbox" id="consent-check">
+        <span>Entiendo y quiero participar en este ejercicio.</span>
+      </label>
+      <div class="nav" style="justify-content:flex-end;">
+        <button class="btn-primary" id="btn-start" disabled>Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1: trolley (contenido inyectado por JS según la variante asignada) -->
+  <div class="step" data-step="1">
+    <div class="dots" id="dots-1"></div>
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:8px;">Paso 1 de 3</div>
+      <h1>El dilema</h1>
+      <div class="vignette" id="vignette-text"></div>
+      <label class="field-label" id="question-text"></label>
+      <div class="scale7" id="accept-scale">
+        <label><input type="radio" name="accept" value="1"><span>1</span></label>
+        <label><input type="radio" name="accept" value="2"><span>2</span></label>
+        <label><input type="radio" name="accept" value="3"><span>3</span></label>
+        <label><input type="radio" name="accept" value="4"><span>4</span></label>
+        <label><input type="radio" name="accept" value="5"><span>5</span></label>
+        <label><input type="radio" name="accept" value="6"><span>6</span></label>
+        <label><input type="radio" name="accept" value="7"><span>7</span></label>
+      </div>
+      <div class="scale-caps"><span>Totalmente inaceptable</span><span>Totalmente aceptable</span></div>
+      <div class="err" id="err-accept" style="margin-top:12px;">Elige un valor de 1 a 7.</div>
+      <div class="nav">
+        <button class="btn-ghost" data-back>Atrás</button>
+        <button class="btn-primary" data-next="1">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: demographics -->
+  <div class="step" data-step="2">
+    <div class="dots" id="dots-2"></div>
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:8px;">Paso 2 de 3</div>
+      <h1>Un poco sobre ti</h1>
+
+      <label class="field-label">Género</label>
+      <fieldset>
+        <label class="opt"><input type="radio" name="genero" value="Mujer"><span>Mujer</span></label>
+        <label class="opt"><input type="radio" name="genero" value="Hombre"><span>Hombre</span></label>
+        <label class="opt"><input type="radio" name="genero" value="Otro"><span>Otro</span></label>
+        <label class="opt"><input type="radio" name="genero" value="Prefiero no decirlo"><span>Prefiero no decirlo</span></label>
+      </fieldset>
+
+      <label class="field-label">¿Qué tan religioso/a te consideras? (1 = nada, 5 = muy)</label>
+      <div class="scale7" style="max-width:260px;">
+        <label><input type="radio" name="relig" value="1"><span>1</span></label>
+        <label><input type="radio" name="relig" value="2"><span>2</span></label>
+        <label><input type="radio" name="relig" value="3"><span>3</span></label>
+        <label><input type="radio" name="relig" value="4"><span>4</span></label>
+        <label><input type="radio" name="relig" value="5"><span>5</span></label>
+      </div>
+      <div class="scale-caps" style="max-width:260px;"><span>Nada</span><span>Muy</span></div>
+
+      <label class="field-label" style="margin-top:16px;">¿Practicas una religión?</label>
+      <fieldset>
+        <label class="opt"><input type="radio" name="practica" value="Sí"><span>Sí</span></label>
+        <label class="opt"><input type="radio" name="practica" value="No"><span>No</span></label>
+      </fieldset>
+      <div class="err" id="err-demo">Responde las tres preguntas para continuar.</div>
+
+      <div class="nav">
+        <button class="btn-ghost" data-back>Atrás</button>
+        <button class="btn-primary" data-next="2">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: TIPI-10 -->
+  <div class="step" data-step="3">
+    <div class="dots" id="dots-3"></div>
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:8px;">Paso 3 de 3</div>
+      <h1>Cómo te describes</h1>
+      <p class="soft">Me veo a mí mismo/a como alguien que es… (1 = muy en desacuerdo, 7 = muy de acuerdo)</p>
+      <div id="tipi-list"></div>
+      <div class="err" id="err-tipi">Responde las 10 frases para continuar.</div>
+      <div class="nav">
+        <button class="btn-ghost" data-back>Atrás</button>
+        <button class="btn-primary" id="btn-submit">Enviar respuestas</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DONE -->
+  <div class="step" data-step="done">
+    <div class="card done-screen">
+      <div class="stamp">✓ Registrado</div>
+      <h1 style="font-size:22px;">Gracias por participar</h1>
+      <p class="soft">Tus respuestas se sumaron a las del curso. Vamos a analizarlas juntos en unos minutos.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ------------------------------------------------------------------
+  // Configuración del formulario de Google (destino de los datos).
+  // Ver docs/GOOGLE_FORMS_SETUP.md para crear el formulario y obtener
+  // la URL de acción y los entry.NNNNNN de cada campo.
+  // ------------------------------------------------------------------
+  const FORM_CONFIG = {
+    action: "REEMPLAZA_CON_TU_FORM_ACTION_URL",
+    entries: {
+      variante:          "REEMPLAZA_ENTRY_ID",
+      aceptabilidad:     "REEMPLAZA_ENTRY_ID",
+      genero:            "REEMPLAZA_ENTRY_ID",
+      religiosidad:      "REEMPLAZA_ENTRY_ID",
+      practica_religion: "REEMPLAZA_ENTRY_ID",
+      tipi_json:         "REEMPLAZA_ENTRY_ID",
+      submission_id:     "REEMPLAZA_ENTRY_ID",
+      modulo:            "REEMPLAZA_ENTRY_ID"
+    }
+  };
+
+  const VARIANTS = {
+    switch: {
+      vignette: 'Un tranvía fuera de control se dirige hacia 5 personas que están en la vía y morirán si no haces nada. Estás junto a una palanca: si la jalas, el tranvía se desviará a una vía secundaria, donde matará a 1 persona en lugar de 5.',
+      question: '¿Es moralmente aceptable jalar la palanca?'
+    },
+    push: {
+      vignette: 'Un tranvía fuera de control se dirige hacia 5 personas que morirán si no haces nada. Estás en un puente sobre la vía, junto a un desconocido muy corpulento. La única forma de detener el tranvía es empujar a esta persona hacia la vía: morirá, pero su cuerpo detendrá el tranvía y salvará a las 5 personas.',
+      question: '¿Es moralmente aceptable empujar a esta persona?'
+    }
+  };
+  const variantKey = Math.random() < 0.5 ? 'switch' : 'push';
+  const variant = VARIANTS[variantKey];
+  document.getElementById('vignette-text').textContent = variant.vignette;
+  document.getElementById('question-text').textContent = variant.question;
+
+  // TIPI-10 (Gosling, Rentfrow & Swann 2003). r = ítem de puntaje invertido.
+  const TIPI = [
+    { text:'Extrovertido/a, entusiasta.', trait:'extraversion', r:false },
+    { text:'Crítico/a, propenso/a a discutir.', trait:'amabilidad', r:true },
+    { text:'Confiable, autodisciplinado/a.', trait:'meticulosidad', r:false },
+    { text:'Ansioso/a, se altera con facilidad.', trait:'estabilidad_emocional', r:true },
+    { text:'Abierto/a a nuevas experiencias, complejo/a.', trait:'apertura', r:false },
+    { text:'Reservado/a, tranquilo/a.', trait:'extraversion', r:true },
+    { text:'Compasivo/a, de buen corazón.', trait:'amabilidad', r:false },
+    { text:'Desorganizado/a, descuidado/a.', trait:'meticulosidad', r:true },
+    { text:'Calmado/a, emocionalmente estable.', trait:'estabilidad_emocional', r:false },
+    { text:'Convencional/a, poco creativo/a.', trait:'apertura', r:true },
+  ];
+  const tipiList = document.getElementById('tipi-list');
+  TIPI.forEach((row, i) => {
+    const n = i + 1;
+    const div = document.createElement('div');
+    div.className = 'tipi-item';
+    div.innerHTML = `
+      <p>${n}. ${row.text}</p>
+      <div class="scale7">
+        ${[1,2,3,4,5,6,7].map(v => `<label><input type="radio" name="tipi-${n}" value="${v}"><span>${v}</span></label>`).join('')}
+      </div>`;
+    tipiList.appendChild(div);
+  });
+
+  const state = { step: 0 };
+  function steps(){ return Array.from(document.querySelectorAll('.step')); }
+  function showStep(n){
+    steps().forEach(s => s.classList.toggle('active', s.dataset.step === String(n)));
+    state.step = n;
+    if (typeof n === 'number' && n > 0) renderDots(n);
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+  function renderDots(n){
+    const el = document.getElementById('dots-' + n);
+    if(!el) return;
+    el.innerHTML = '';
+    for(let i=1;i<=3;i++){
+      const d = document.createElement('div');
+      d.className = 'dot' + (i <= n ? ' done' : '');
+      el.appendChild(d);
+    }
+  }
+
+  document.getElementById('consent-check').addEventListener('change', e => {
+    document.getElementById('btn-start').disabled = !e.target.checked;
+  });
+  document.getElementById('btn-start').addEventListener('click', () => showStep(1));
+
+  document.addEventListener('click', e => {
+    if (e.target.matches('[data-back]')) showStep(Math.max(0, state.step - 1));
+  });
+
+  document.addEventListener('change', e => {
+    if (e.target.matches('input[type=radio]')){
+      document.querySelectorAll('input[name="' + e.target.name + '"]').forEach(sib => {
+        const wrap = sib.closest('.opt') || sib.closest('label');
+        if (wrap) wrap.classList.toggle('checked', sib.checked);
+      });
+    }
+  });
+
+  function radioVal(name){
+    const el = document.querySelector('input[name="'+name+'"]:checked');
+    return el ? el.value : null;
+  }
+
+  document.querySelectorAll('[data-next]').forEach(b => {
+    b.addEventListener('click', () => {
+      const from = Number(b.dataset.next);
+      if (from === 1){
+        const v = radioVal('accept');
+        document.getElementById('err-accept').style.display = v ? 'none' : 'block';
+        if (!v) return;
+      }
+      if (from === 2){
+        const g = radioVal('genero'), r = radioVal('relig'), p = radioVal('practica');
+        const ok = g && r && p;
+        document.getElementById('err-demo').style.display = ok ? 'none' : 'block';
+        if (!ok) return;
+      }
+      showStep(from + 1);
+    });
+  });
+
+  document.getElementById('btn-submit').addEventListener('click', async () => {
+    const tipiAnswers = TIPI.map((row, i) => {
+      const v = radioVal('tipi-' + (i + 1));
+      return v ? { trait: row.trait, r: row.r, value: Number(v) } : null;
+    });
+    if (tipiAnswers.some(a => a === null)){
+      document.getElementById('err-tipi').style.display = 'block';
+      return;
+    }
+    document.getElementById('err-tipi').style.display = 'none';
+
+    const payload = {
+      variante: variantKey,
+      aceptabilidad: radioVal('accept'),
+      genero: radioVal('genero'),
+      religiosidad: radioVal('relig'),
+      practica_religion: radioVal('practica'),
+      tipi_json: JSON.stringify(tipiAnswers),
+      submission_id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+      modulo: 'C'
+    };
+
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true; btn.textContent = 'Enviando…';
+
+    try{
+      if (FORM_CONFIG.action.startsWith('REEMPLAZA')){
+        console.warn('FORM_CONFIG sin configurar todavía — la respuesta no se envió a ningún formulario.', payload);
+      } else {
+        const params = new URLSearchParams();
+        Object.entries(FORM_CONFIG.entries).forEach(([key, entryId]) => {
+          if (payload[key] !== undefined) params.append(entryId, payload[key]);
+        });
+        await fetch(FORM_CONFIG.action, { method: 'POST', mode: 'no-cors', body: params });
+      }
+    } catch(e){
+      console.error('Error al enviar', e);
+    }
+    showStep('done');
+  });
+</script>
+</body>
+</html>

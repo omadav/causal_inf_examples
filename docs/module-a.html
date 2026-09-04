@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Módulo A · El precio arbitrario</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F5F1; --panel:#FFFFFF; --panel-2:#FBFBF8;
+    --ink:#1E2624; --ink-soft:#55605C; --line:#D8D9CE;
+    --accent:#2B6E6B; --accent-ink:#163C3A; --accent-contrast:#FFFFFF;
+    --danger:#A23B2E; --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#121715; --panel:#1A211E; --panel-2:#1F2724;
+      --ink:#ECEFEA; --ink-soft:#9FAAA4; --line:#2B3330;
+      --accent:#59B8AC; --accent-ink:#DFF7F2; --accent-contrast:#0C1615;
+      --danger:#E08A79;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#121715; --panel:#1A211E; --panel-2:#1F2724;
+    --ink:#ECEFEA; --ink-soft:#9FAAA4; --line:#2B3330;
+    --accent:#59B8AC; --accent-ink:#DFF7F2; --accent-contrast:#0C1615;
+    --danger:#E08A79;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'Public Sans',-apple-system,'Segoe UI',sans-serif;
+    display:flex; justify-content:center; padding:28px 14px 56px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .stage{width:100%; max-width:520px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--accent-ink); font-weight:600;
+  }
+  .rule{height:2px; background:var(--accent); width:38px; margin:10px 0 18px; border-radius:2px;}
+  .dots{display:flex; gap:6px; margin-bottom:20px;}
+  .dot{width:22px; height:4px; border-radius:2px; background:var(--line);}
+  .dot.done{background:var(--accent);}
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:26px 22px 20px; box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  h1{
+    font-family:'Fraunces',Georgia,serif; font-weight:600; font-size:28px;
+    line-height:1.15; margin:0 0 12px; text-wrap:balance;
+  }
+  p{margin:0 0 14px; line-height:1.55; color:var(--ink);}
+  p.soft{color:var(--ink-soft); font-size:14.5px;}
+  .item-card{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:10px;
+    padding:14px 16px; margin-bottom:16px; font-size:15px; color:var(--ink-soft);
+  }
+  .item-card b{color:var(--ink); font-weight:600;}
+  label.field-label{display:block; font-size:14px; font-weight:600; margin:0 0 8px;}
+  .price-preview{
+    font-family:'IBM Plex Mono',monospace; font-size:40px; font-weight:600;
+    color:var(--accent-ink); margin:6px 0 16px; letter-spacing:.02em;
+  }
+  input[type=number], input[type=text]{
+    width:100%; font-family:'IBM Plex Mono',monospace; font-size:20px;
+    padding:13px 14px; border-radius:10px; border:1.5px solid var(--line);
+    background:var(--panel); color:var(--ink); outline:none;
+  }
+  input:focus{border-color:var(--accent);}
+  .clp-wrap{position:relative;}
+  .clp-wrap span{
+    position:absolute; left:14px; top:50%; transform:translateY(-50%);
+    font-family:'IBM Plex Mono',monospace; color:var(--ink-soft); font-size:20px;
+  }
+  .clp-wrap input{padding-left:34px;}
+  fieldset{border:none; padding:0; margin:0 0 18px;}
+  .opt{
+    display:flex; align-items:center; gap:10px; padding:11px 12px;
+    border:1.5px solid var(--line); border-radius:10px; margin-bottom:8px; cursor:pointer;
+  }
+  .opt input{width:16px; height:16px; accent-color:var(--accent); margin:0;}
+  .opt.checked{border-color:var(--accent); background:var(--panel-2);}
+  .scale{display:flex; gap:6px;}
+  .scale label{
+    flex:1; text-align:center; border:1.5px solid var(--line); border-radius:8px;
+    padding:10px 0; font-family:'IBM Plex Mono',monospace; font-size:15px; cursor:pointer;
+  }
+  .scale input{position:absolute; opacity:0; pointer-events:none;}
+  .scale label.checked{border-color:var(--accent); background:var(--accent); color:var(--accent-contrast);}
+  .scale-caps{display:flex; justify-content:space-between; font-size:11.5px; color:var(--ink-soft); margin-top:6px;}
+  .consent-row{display:flex; gap:10px; align-items:flex-start; margin:18px 0 6px; cursor:pointer;}
+  .consent-row input{margin-top:3px; width:17px; height:17px; accent-color:var(--accent);}
+  .nav{display:flex; justify-content:space-between; align-items:center; margin-top:22px;}
+  button{
+    font-family:'Public Sans',sans-serif; font-weight:600; font-size:15px;
+    border-radius:10px; padding:12px 20px; border:1.5px solid transparent; cursor:pointer;
+  }
+  .btn-primary{background:var(--accent); color:var(--accent-contrast);}
+  .btn-primary:disabled{opacity:.4; cursor:not-allowed;}
+  .btn-ghost{background:transparent; color:var(--ink-soft); border-color:var(--line);}
+  .step{display:none;}
+  .step.active{display:block;}
+  .done-screen{text-align:center; padding:30px 6px;}
+  .stamp{
+    display:inline-flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace;
+    font-size:13px; font-weight:600; letter-spacing:.06em; color:var(--accent-ink);
+    border:1.5px solid var(--accent); border-radius:999px; padding:6px 14px; margin-bottom:18px;
+  }
+  .err{color:var(--danger); font-size:13px; margin-top:-8px; margin-bottom:12px; display:none;}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="eyebrow">Protocolo · Módulo A</div>
+  <div class="rule"></div>
+
+  <!-- STEP 0: consent -->
+  <div class="step active" data-step="0">
+    <div class="card">
+      <h1>El precio arbitrario</h1>
+      <p>Un ejercicio breve para la clase de inferencia causal. No pedimos tu nombre ni tu RUT completo — solo los dos últimos dígitos. Tus respuestas son anónimas y se analizarán de forma agrupada, en vivo, durante la clase.</p>
+      <p class="soft">Tiempo estimado: 2 minutos.</p>
+      <label class="consent-row">
+        <input type="checkbox" id="consent-check">
+        <span>Entiendo y quiero participar en este ejercicio.</span>
+      </label>
+      <div class="nav" style="justify-content:flex-end;">
+        <button class="btn-primary" id="btn-start" disabled>Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1: RUT digits -->
+  <div class="step" data-step="1">
+    <div class="dots" id="dots-1"></div>
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:8px;">Paso 1 de 4</div>
+      <h1>Tus dos últimos dígitos</h1>
+      <p>Escribe los <b>dos últimos dígitos de tu RUT</b> (antes del guión verificador), como si fueran un precio en pesos chilenos.</p>
+      <div class="price-preview" id="price-preview">$ &mdash;&mdash;</div>
+      <input type="number" inputmode="numeric" min="0" max="99" placeholder="Ej: 37" id="input-rut">
+      <div class="err" id="err-rut">Ingresa un número de 0 a 99.</div>
+      <div class="nav">
+        <button class="btn-ghost" data-back>Atrás</button>
+        <button class="btn-primary" data-next="1">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: WTP wine -->
+  <div class="step" data-step="2">
+    <div class="dots" id="dots-2"></div>
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:8px;">Paso 2 de 4</div>
+      <h1>¿Cuánto pagarías?</h1>
+      <div class="item-card"><b>Botella de vino</b> tinto, reserva, 750&nbsp;ml, sin marca reconocible.</div>
+      <p>Sin cambiar el número que escribiste antes: ¿cuál es el <b>máximo</b> que estarías dispuesto/a a pagar por esta botella, en pesos chilenos?</p>
+      <div class="clp-wrap"><span>$</span><input type="number" inputmode="numeric" min="0" placeholder="0" id="input-wine"></div>
+      <div class="err" id="err-wine">Ingresa un monto en pesos.</div>
+      <div class="nav">
+        <button class="btn-ghost" data-back>Atrás</button>
+        <button class="btn-primary" data-next="2">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: WTP earbuds -->
+  <div class="step" data-step="3">
+    <div class="dots" id="dots-3"></div>
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:8px;">Paso 3 de 4</div>
+      <h1>¿Cuánto pagarías?</h1>
+      <div class="item-card"><b>Audífonos inalámbricos</b> bluetooth, genéricos, sin marca reconocible.</div>
+      <p>¿Cuál es el <b>máximo</b> que estarías dispuesto/a a pagar por estos audífonos, en pesos chilenos?</p>
+      <div class="clp-wrap"><span>$</span><input type="number" inputmode="numeric" min="0" placeholder="0" id="input-earbuds"></div>
+      <div class="err" id="err-earbuds">Ingresa un monto en pesos.</div>
+      <div class="nav">
+        <button class="btn-ghost" data-back>Atrás</button>
+        <button class="btn-primary" data-next="3">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4: demographics -->
+  <div class="step" data-step="4">
+    <div class="dots" id="dots-4"></div>
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:8px;">Paso 4 de 4</div>
+      <h1>Un poco sobre ti</h1>
+      <p class="soft">Últimas preguntas — nos sirven para comparar grupos en clase.</p>
+
+      <label class="field-label">Edad</label>
+      <fieldset id="grp-edad">
+        <label class="opt"><input type="radio" name="edad" value="<20"><span>Menos de 20</span></label>
+        <label class="opt"><input type="radio" name="edad" value="20-24"><span>20–24</span></label>
+        <label class="opt"><input type="radio" name="edad" value="25-29"><span>25–29</span></label>
+        <label class="opt"><input type="radio" name="edad" value="30-39"><span>30–39</span></label>
+        <label class="opt"><input type="radio" name="edad" value="40+"><span>40 o más</span></label>
+      </fieldset>
+
+      <label class="field-label">Género</label>
+      <fieldset id="grp-genero">
+        <label class="opt"><input type="radio" name="genero" value="Mujer"><span>Mujer</span></label>
+        <label class="opt"><input type="radio" name="genero" value="Hombre"><span>Hombre</span></label>
+        <label class="opt"><input type="radio" name="genero" value="Otro"><span>Otro</span></label>
+        <label class="opt"><input type="radio" name="genero" value="Prefiero no decirlo"><span>Prefiero no decirlo</span></label>
+      </fieldset>
+
+      <label class="field-label">¿Qué tan religioso/a te consideras? (1 = nada, 5 = muy)</label>
+      <div class="scale" id="grp-relig">
+        <label><input type="radio" name="relig" value="1"><span>1</span></label>
+        <label><input type="radio" name="relig" value="2"><span>2</span></label>
+        <label><input type="radio" name="relig" value="3"><span>3</span></label>
+        <label><input type="radio" name="relig" value="4"><span>4</span></label>
+        <label><input type="radio" name="relig" value="5"><span>5</span></label>
+      </div>
+      <div class="scale-caps"><span>Nada</span><span>Muy</span></div>
+
+      <label class="field-label" style="margin-top:16px;">¿Practicas una religión?</label>
+      <fieldset id="grp-practica">
+        <label class="opt"><input type="radio" name="practica" value="Sí"><span>Sí</span></label>
+        <label class="opt"><input type="radio" name="practica" value="No"><span>No</span></label>
+      </fieldset>
+      <div class="err" id="err-demo">Responde las cuatro preguntas para continuar.</div>
+
+      <div class="nav">
+        <button class="btn-ghost" data-back>Atrás</button>
+        <button class="btn-primary" id="btn-submit">Enviar respuestas</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DONE -->
+  <div class="step" data-step="done">
+    <div class="card done-screen">
+      <div class="stamp">✓ Registrado</div>
+      <h1 style="font-size:22px;">Gracias por participar</h1>
+      <p class="soft">Tus respuestas se sumaron a las del curso. Vamos a analizarlas juntos en unos minutos.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ------------------------------------------------------------------
+  // Configuración del formulario de Google (destino de los datos).
+  // Reemplaza estos valores por los de tu propio formulario:
+  //  1. Crea un Google Form con los campos de docs/GOOGLE_FORMS_SETUP.md
+  //  2. Rellena una respuesta de prueba y usa "Obtener enlace con
+  //     respuestas prellenadas" para leer los entry.NNNNNN de cada campo.
+  //  3. Pega la URL de acción y cada entry.NNNNNN aquí abajo.
+  // ------------------------------------------------------------------
+  const FORM_CONFIG = {
+    action: "REEMPLAZA_CON_TU_FORM_ACTION_URL", // https://docs.google.com/forms/d/e/XXXXXXX/formResponse
+    entries: {
+      rut_digitos:     "REEMPLAZA_ENTRY_ID",
+      wtp_vino:        "REEMPLAZA_ENTRY_ID",
+      wtp_audifonos:   "REEMPLAZA_ENTRY_ID",
+      edad_rango:      "REEMPLAZA_ENTRY_ID",
+      genero:          "REEMPLAZA_ENTRY_ID",
+      religiosidad:    "REEMPLAZA_ENTRY_ID",
+      practica_religion:"REEMPLAZA_ENTRY_ID",
+      submission_id:   "REEMPLAZA_ENTRY_ID",
+      modulo:          "REEMPLAZA_ENTRY_ID"
+    }
+  };
+
+  const state = { step: 0, order: [0,1,2,3,4] };
+  const steps = Array.from(document.querySelectorAll('.step'));
+
+  function showStep(n){
+    steps.forEach(s => s.classList.toggle('active', s.dataset.step === String(n)));
+    state.step = n;
+    if (typeof n === 'number' && n > 0) renderDots(n);
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+  function renderDots(n){
+    const el = document.getElementById('dots-' + n);
+    if(!el) return;
+    el.innerHTML = '';
+    for(let i=1;i<=4;i++){
+      const d = document.createElement('div');
+      d.className = 'dot' + (i <= n ? ' done' : '');
+      el.appendChild(d);
+    }
+  }
+
+  document.getElementById('consent-check').addEventListener('change', e => {
+    document.getElementById('btn-start').disabled = !e.target.checked;
+  });
+  document.getElementById('btn-start').addEventListener('click', () => showStep(1));
+
+  document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => {
+    showStep(Math.max(0, state.step - 1));
+  }));
+
+  const rutInput = document.getElementById('input-rut');
+  rutInput.addEventListener('input', () => {
+    const v = rutInput.value;
+    document.getElementById('price-preview').textContent =
+      v === '' ? '$ ——' : ('$ ' + v);
+  });
+
+  document.querySelectorAll('.opt input, .scale input').forEach(inp => {
+    inp.addEventListener('change', () => {
+      document.querySelectorAll('input[name="' + inp.name + '"]').forEach(sib => {
+        const wrap = sib.closest('.opt') || sib.closest('label');
+        if (wrap) wrap.classList.toggle('checked', sib.checked);
+      });
+    });
+  });
+
+  function next(from){
+    if (from === 1){
+      const v = Number(rutInput.value);
+      const ok = rutInput.value !== '' && v >= 0 && v <= 99 && Number.isInteger(v);
+      document.getElementById('err-rut').style.display = ok ? 'none' : 'block';
+      if(!ok) return;
+    }
+    if (from === 2){
+      const v = document.getElementById('input-wine').value;
+      const ok = v !== '' && Number(v) >= 0;
+      document.getElementById('err-wine').style.display = ok ? 'none' : 'block';
+      if(!ok) return;
+    }
+    if (from === 3){
+      const v = document.getElementById('input-earbuds').value;
+      const ok = v !== '' && Number(v) >= 0;
+      document.getElementById('err-earbuds').style.display = ok ? 'none' : 'block';
+      if(!ok) return;
+    }
+    showStep(from + 1);
+  }
+  document.querySelectorAll('[data-next]').forEach(b => {
+    b.addEventListener('click', () => next(Number(b.dataset.next)));
+  });
+
+  function radioVal(name){
+    const el = document.querySelector('input[name="'+name+'"]:checked');
+    return el ? el.value : null;
+  }
+
+  document.getElementById('btn-submit').addEventListener('click', async () => {
+    const edad = radioVal('edad'), genero = radioVal('genero'),
+          relig = radioVal('relig'), practica = radioVal('practica');
+    if (!edad || !genero || !relig || !practica){
+      document.getElementById('err-demo').style.display = 'block';
+      return;
+    }
+    document.getElementById('err-demo').style.display = 'none';
+
+    const payload = {
+      rut_digitos: rutInput.value.padStart(2,'0'),
+      wtp_vino: document.getElementById('input-wine').value,
+      wtp_audifonos: document.getElementById('input-earbuds').value,
+      edad_rango: edad,
+      genero: genero,
+      religiosidad: relig,
+      practica_religion: practica,
+      submission_id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+      modulo: 'A'
+    };
+
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true; btn.textContent = 'Enviando…';
+
+    try{
+      if (FORM_CONFIG.action.startsWith('REEMPLAZA')){
+        console.warn('FORM_CONFIG sin configurar todavía — la respuesta no se envió a ningún formulario.', payload);
+      } else {
+        const params = new URLSearchParams();
+        Object.entries(FORM_CONFIG.entries).forEach(([key, entryId]) => {
+          if (payload[key] !== undefined) params.append(entryId, payload[key]);
+        });
+        await fetch(FORM_CONFIG.action, { method: 'POST', mode: 'no-cors', body: params });
+      }
+    } catch(e){
+      console.error('Error al enviar', e);
+    }
+    showStep('done');
+  });
+</script>
+</body>
+</html>
