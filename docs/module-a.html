@@ -71,11 +71,11 @@
   }
   input:focus{border-color:var(--accent);}
   .clp-wrap{position:relative;}
-  .clp-wrap span{
-    position:absolute; left:14px; top:50%; transform:translateY(-50%);
-    font-family:'IBM Plex Mono',monospace; color:var(--ink-soft); font-size:20px;
+  .clp-wrap .suffix{
+    position:absolute; right:14px; top:50%; transform:translateY(-50%);
+    font-family:'IBM Plex Mono',monospace; color:var(--ink-soft); font-size:16px;
   }
-  .clp-wrap input{padding-left:34px;}
+  .clp-wrap input{padding-right:66px;}
   fieldset{border:none; padding:0; margin:0 0 18px;}
   .opt{
     display:flex; align-items:center; gap:10px; padding:11px 12px;
@@ -121,8 +121,7 @@
   <div class="step active" data-step="0">
     <div class="card">
       <h1>El precio arbitrario</h1>
-      <p>Un ejercicio breve para la clase de inferencia causal. No pedimos tu nombre ni tu RUT completo — solo los dos últimos dígitos. Tus respuestas son anónimas y se analizarán de forma agrupada, en vivo, durante la clase.</p>
-      <p class="soft">Tiempo estimado: 2 minutos.</p>
+      <p class="soft">Anónimo, 2 minutos. No pedimos tu nombre ni tu RUT completo.</p>
       <label class="consent-row">
         <input type="checkbox" id="consent-check">
         <span>Entiendo y quiero participar en este ejercicio.</span>
@@ -139,8 +138,8 @@
     <div class="card">
       <div class="eyebrow" style="margin-bottom:8px;">Paso 1 de 4</div>
       <h1>Tus dos últimos dígitos</h1>
-      <p>Escribe los <b>dos últimos dígitos de tu RUT</b> (antes del guión verificador), como si fueran un precio en pesos chilenos.</p>
-      <div class="price-preview" id="price-preview">$ &mdash;&mdash;</div>
+      <p>Escribe los <b>dos últimos dígitos de tu RUT</b> (antes del guión), como si fueran un precio en <b>lucas</b>.</p>
+      <div class="price-preview" id="price-preview">&mdash;&mdash; lucas</div>
       <input type="number" inputmode="numeric" min="0" max="99" placeholder="Ej: 37" id="input-rut">
       <div class="err" id="err-rut">Ingresa un número de 0 a 99.</div>
       <div class="nav">
@@ -157,9 +156,9 @@
       <div class="eyebrow" style="margin-bottom:8px;">Paso 2 de 4</div>
       <h1>¿Cuánto pagarías?</h1>
       <div class="item-card"><b>Botella de vino</b> tinto, reserva, 750&nbsp;ml, sin marca reconocible.</div>
-      <p>Sin cambiar el número que escribiste antes: ¿cuál es el <b>máximo</b> que estarías dispuesto/a a pagar por esta botella, en pesos chilenos?</p>
-      <div class="clp-wrap"><span>$</span><input type="number" inputmode="numeric" min="0" placeholder="0" id="input-wine"></div>
-      <div class="err" id="err-wine">Ingresa un monto en pesos.</div>
+      <p>Sin cambiar el número que escribiste antes: ¿cuál es el <b>máximo</b> que pagarías por esta botella, en lucas?</p>
+      <div class="clp-wrap"><input type="number" inputmode="numeric" min="0" placeholder="Ej: 15" id="input-wine"><span class="suffix">lucas</span></div>
+      <div class="err" id="err-wine">Ingresa un monto en lucas.</div>
       <div class="nav">
         <button class="btn-ghost" data-back>Atrás</button>
         <button class="btn-primary" data-next="2">Continuar</button>
@@ -174,9 +173,9 @@
       <div class="eyebrow" style="margin-bottom:8px;">Paso 3 de 4</div>
       <h1>¿Cuánto pagarías?</h1>
       <div class="item-card"><b>Audífonos inalámbricos</b> bluetooth, genéricos, sin marca reconocible.</div>
-      <p>¿Cuál es el <b>máximo</b> que estarías dispuesto/a a pagar por estos audífonos, en pesos chilenos?</p>
-      <div class="clp-wrap"><span>$</span><input type="number" inputmode="numeric" min="0" placeholder="0" id="input-earbuds"></div>
-      <div class="err" id="err-earbuds">Ingresa un monto en pesos.</div>
+      <p>¿Cuál es el <b>máximo</b> que pagarías por estos audífonos, en lucas?</p>
+      <div class="clp-wrap"><input type="number" inputmode="numeric" min="0" placeholder="Ej: 15" id="input-earbuds"><span class="suffix">lucas</span></div>
+      <div class="err" id="err-earbuds">Ingresa un monto en lucas.</div>
       <div class="nav">
         <button class="btn-ghost" data-back>Atrás</button>
         <button class="btn-primary" data-next="3">Continuar</button>
@@ -295,7 +294,7 @@
   rutInput.addEventListener('input', () => {
     const v = rutInput.value;
     document.getElementById('price-preview').textContent =
-      v === '' ? '$ ——' : ('$ ' + v);
+      (v === '' ? '——' : v) + ' lucas';
   });
 
   document.querySelectorAll('.opt input, .scale input').forEach(inp => {
@@ -348,8 +347,8 @@
 
     const data = {
       rut_digitos: rutInput.value.padStart(2,'0'),
-      wtp_vino: document.getElementById('input-wine').value,
-      wtp_audifonos: document.getElementById('input-earbuds').value,
+      wtp_vino_lucas: document.getElementById('input-wine').value,
+      wtp_audifonos_lucas: document.getElementById('input-earbuds').value,
       edad_rango: edad,
       genero: genero,
       religiosidad: relig,
