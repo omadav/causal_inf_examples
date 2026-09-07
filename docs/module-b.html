@@ -94,6 +94,7 @@
     font-size:13px; font-weight:600; letter-spacing:.06em; color:var(--accent-ink);
     border:1.5px solid var(--accent); border-radius:999px; padding:6px 14px; margin-bottom:18px;
   }
+  .stamp.warn{ color:var(--danger); border-color:var(--danger); }
   .err{color:var(--danger); font-size:13px; margin-top:-2px; margin-bottom:12px; display:none;}
   .reveal{display:none; margin-top:16px; padding-top:16px; border-top:1px dashed var(--line);}
   .reveal.show{display:block;}
@@ -173,27 +174,22 @@
   <!-- DONE -->
   <div class="step" data-step="done">
     <div class="card done-screen">
-      <div class="stamp">✓ Registrado</div>
-      <h1 style="font-size:22px;">Gracias por participar</h1>
-      <p class="soft">Tus respuestas se sumaron a las del curso. Vamos a analizarlas juntos en unos minutos.</p>
+      <div class="stamp" id="done-stamp">✓ Registrado</div>
+      <h1 style="font-size:22px;" id="done-title">Gracias por participar</h1>
+      <p class="soft" id="done-text">Tus respuestas se sumaron a las del curso. Vamos a analizarlas juntos en unos minutos.</p>
     </div>
   </div>
 </div>
 
 <script>
   // ------------------------------------------------------------------
-  // Configuración del formulario de Google (destino de los datos).
-  // Ver docs/GOOGLE_FORMS_SETUP.md para crear el formulario y obtener
-  // la URL de acción y los entry.NNNNNN de cada campo.
+  // Backend de datos: Web3Forms (https://web3forms.com). Un único formulario
+  // compartido por los 3 módulos -- cada envío manda { access_key, modulo,
+  // payload_json } como JSON. A diferencia de Google Forms, esto da una
+  // respuesta real y legible (no opaca), así que sí podemos detectar fallos.
   // ------------------------------------------------------------------
-  // Un solo Google Form, compartido por los 3 módulos, con solo 2 preguntas:
-  // "modulo" (A/B/C) y "payload_json" (todas las respuestas, como JSON).
-  const FORM_CONFIG = {
-    action: "https://docs.google.com/forms/d/e/1FAIpQLSfdfj8Odg_emJH_mfO_TmDdvgP-VzQRAVBeWvuAKcs4AQB2qg/formResponse",
-    entries: {
-      modulo:       "entry.1155293793",
-      payload_json: "entry.919941881"
-    }
+  const WEB3FORMS_CONFIG = {
+    accessKey: "582d6f36-2057-4a24-9bfd-ab66651942de"
   };
 
   // Respaldo local: guarda la respuesta como un CSV en el dispositivo del
@@ -367,17 +363,29 @@
 
     downloadBackup('B', data);
 
+    let ok = false;
     try{
-      if (FORM_CONFIG.action.startsWith('REEMPLAZA')){
-        console.warn('FORM_CONFIG sin configurar todavía — la respuesta no se envió a ningún formulario.', data);
-      } else {
-        const params = new URLSearchParams();
-        params.append(FORM_CONFIG.entries.modulo, 'B');
-        params.append(FORM_CONFIG.entries.payload_json, JSON.stringify(data));
-        await fetch(FORM_CONFIG.action, { method: 'POST', mode: 'no-cors', body: params });
-      }
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_CONFIG.accessKey,
+          modulo: 'B',
+          payload_json: JSON.stringify(data)
+        })
+      });
+      const result = await res.json();
+      ok = res.ok && result.success;
+      if (!ok) console.error('Web3Forms rechazó el envío', result);
     } catch(e){
       console.error('Error al enviar', e);
+    }
+
+    if (!ok){
+      document.getElementById('done-stamp').textContent = '⚠ No se pudo enviar';
+      document.getElementById('done-stamp').classList.add('warn');
+      document.getElementById('done-title').textContent = 'Se descargó tu copia local';
+      document.getElementById('done-text').textContent = 'No pudimos confirmar el envío al servidor, pero tu respuesta se guardó como un archivo CSV en tu dispositivo. Avísale a tu profesor.';
     }
     showStep('done');
   });
