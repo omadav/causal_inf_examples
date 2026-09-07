@@ -1,0 +1,4 @@
+# Real response data stays local, never committed -- even though it's
+# anonymous, it's collected human-subjects data and doesn't belong in a
+# public repo's permanent history.
+*.csv
