@@ -3,29 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Módulo B · Ganar o perder</title>
+<title>Módulo D · Aceptar o rechazar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F4F5F1; --panel:#FFFFFF; --panel-2:#FBF9F3;
-    --ink:#1E2624; --ink-soft:#55605C; --line:#DEDACB;
-    --accent:#B9862A; --accent-ink:#6B4C13; --accent-contrast:#FFFFFF;
+    --bg:#F1F4F6; --panel:#FFFFFF; --panel-2:#F7FAFB;
+    --ink:#182126; --ink-soft:#556370; --line:#D8E0E4;
+    --accent:#2E5C8A; --accent-ink:#1B3A57; --accent-contrast:#FFFFFF;
     --danger:#A23B2E; --radius:14px;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#171310; --panel:#211B15; --panel-2:#26201A;
-      --ink:#F1EBE1; --ink-soft:#B3A48D; --line:#37301F;
-      --accent:#E4AE4E; --accent-ink:#FFF1D2; --accent-contrast:#241B08;
+      --bg:#111619; --panel:#191F23; --panel-2:#1E262B;
+      --ink:#E9EFF2; --ink-soft:#9AACB6; --line:#2A353B;
+      --accent:#6FA3D8; --accent-ink:#DCECFA; --accent-contrast:#0B1720;
       --danger:#E08A79;
     }
   }
   :root[data-theme="dark"]{
-    --bg:#171310; --panel:#211B15; --panel-2:#26201A;
-    --ink:#F1EBE1; --ink-soft:#B3A48D; --line:#37301F;
-    --accent:#E4AE4E; --accent-ink:#FFF1D2; --accent-contrast:#241B08;
+    --bg:#111619; --panel:#191F23; --panel-2:#1E262B;
+    --ink:#E9EFF2; --ink-soft:#9AACB6; --line:#2A353B;
+    --accent:#6FA3D8; --accent-ink:#DCECFA; --accent-contrast:#0B1720;
     --danger:#E08A79;
   }
   *{box-sizing:border-box;}
@@ -42,26 +42,35 @@
   }
   .rule{height:2px; background:var(--accent); width:38px; margin:10px 0 18px; border-radius:2px;}
   .dots{display:flex; gap:6px; margin-bottom:20px;}
-  .dot{width:16px; height:4px; border-radius:2px; background:var(--line);}
+  .dot{width:22px; height:4px; border-radius:2px; background:var(--line);}
   .dot.done{background:var(--accent);}
   .card{
     background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
     padding:26px 22px 20px; box-shadow:0 1px 2px rgba(0,0,0,.04);
   }
   h1{
-    font-family:'Fraunces',Georgia,serif; font-weight:600; font-size:27px;
+    font-family:'Fraunces',Georgia,serif; font-weight:600; font-size:28px;
     line-height:1.15; margin:0 0 12px; text-wrap:balance;
   }
   p{margin:0 0 14px; line-height:1.55; color:var(--ink);}
   p.soft{color:var(--ink-soft); font-size:14.5px;}
   .vignette{
     background:var(--panel-2); border:1px solid var(--line); border-radius:10px;
-    padding:15px 16px; margin-bottom:16px; font-size:15px; line-height:1.6;
+    padding:16px 17px; margin-bottom:16px; font-size:15px; line-height:1.6;
   }
+  .split-row{display:flex; gap:10px; margin-bottom:16px;}
+  .split-tile{
+    flex:1; text-align:center; background:var(--panel-2); border:1px solid var(--line);
+    border-radius:10px; padding:14px 8px;
+  }
+  .split-tile .amt{
+    font-family:'IBM Plex Mono',monospace; font-size:24px; font-weight:600; color:var(--accent-ink);
+  }
+  .split-tile .who{font-size:12px; color:var(--ink-soft); margin-top:4px;}
   label.field-label{display:block; font-size:14px; font-weight:600; margin:0 0 8px;}
-  fieldset{border:none; padding:0; margin:0 0 8px;}
+  fieldset{border:none; padding:0; margin:0 0 18px;}
   .opt{
-    display:flex; align-items:center; gap:10px; padding:12px 13px;
+    display:flex; align-items:center; gap:10px; padding:11px 12px;
     border:1.5px solid var(--line); border-radius:10px; margin-bottom:8px; cursor:pointer;
   }
   .opt input{width:16px; height:16px; accent-color:var(--accent); margin:0;}
@@ -93,19 +102,19 @@
     border:1.5px solid var(--accent); border-radius:999px; padding:6px 14px; margin-bottom:18px;
   }
   .stamp.warn{ color:var(--danger); border-color:var(--danger); }
-  .err{color:var(--danger); font-size:13px; margin-top:-2px; margin-bottom:12px; display:none;}
+  .err{color:var(--danger); font-size:13px; margin-top:-8px; margin-bottom:12px; display:none;}
 </style>
 </head>
 <body>
 <div class="stage">
-  <div class="eyebrow">Protocolo · Módulo B</div>
+  <div class="eyebrow">Protocolo · Módulo D</div>
   <div class="rule"></div>
 
   <!-- STEP 0: consent -->
   <div class="step active" data-step="0">
     <div class="card">
-      <h1>Ganar o perder</h1>
-      <p class="soft">Anónimo, 3 minutos. Vas a ver 5 decisiones. En cada una, elige entre una opción segura y una arriesgada.</p>
+      <h1>Aceptar o rechazar</h1>
+      <p class="soft">Anónimo, 2 minutos. Te van a ofrecer repartir un monto de dinero. Decides si aceptas o no.</p>
       <label class="consent-row">
         <input type="checkbox" id="consent-check">
         <span>Entiendo y quiero participar en este ejercicio.</span>
@@ -116,18 +125,41 @@
     </div>
   </div>
 
-  <div id="item-steps"></div>
-
-  <!-- STEP 6: demographics -->
-  <div class="step" data-step="6">
-    <div class="dots" id="dots-6"></div>
+  <!-- STEP 1: oferta (asignada al azar) + decisión -->
+  <div class="step" data-step="1">
+    <div class="dots" id="dots-1"></div>
     <div class="card">
-      <div class="eyebrow" style="margin-bottom:8px;">Última parte</div>
+      <div class="eyebrow" style="margin-bottom:8px;">Paso 1 de 2</div>
+      <h1>Te ofrecen un reparto</h1>
+      <p>Un compañero del curso, elegido al azar, tiene <b>10 lucas</b> para repartir entre él/ella y tú. Te hace la siguiente oferta:</p>
+      <div class="split-row">
+        <div class="split-tile"><div class="amt" id="amt-tuya">—</div><div class="who">Para ti</div></div>
+        <div class="split-tile"><div class="amt" id="amt-otro">—</div><div class="who">Para tu compañero/a</div></div>
+      </div>
+      <p class="soft">Si rechazas la oferta, <b>ninguno de los dos</b> recibe nada.</p>
+      <label class="field-label">¿Aceptarías esta oferta?</label>
+      <fieldset>
+        <label class="opt"><input type="radio" name="decision" value="Acepta"><span>Sí, la acepto</span></label>
+        <label class="opt"><input type="radio" name="decision" value="Rechaza"><span>No, la rechazo</span></label>
+      </fieldset>
+      <div class="err" id="err-decision">Elige una opción para continuar.</div>
+      <div class="nav">
+        <button class="btn-ghost" data-back>Atrás</button>
+        <button class="btn-primary" data-next="1">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: demographics -->
+  <div class="step" data-step="2">
+    <div class="dots" id="dots-2"></div>
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:8px;">Paso 2 de 2</div>
       <h1>Un poco sobre ti</h1>
-      <p class="soft">Nos sirve para comparar grupos en clase.</p>
+      <p class="soft">Últimas preguntas — nos sirven para comparar grupos en clase.</p>
 
       <label class="field-label">Edad</label>
-      <fieldset>
+      <fieldset id="grp-edad">
         <label class="opt"><input type="radio" name="edad" value="<20"><span>Menos de 20</span></label>
         <label class="opt"><input type="radio" name="edad" value="20-24"><span>20–24</span></label>
         <label class="opt"><input type="radio" name="edad" value="25-29"><span>25–29</span></label>
@@ -136,7 +168,7 @@
       </fieldset>
 
       <label class="field-label">Género</label>
-      <fieldset>
+      <fieldset id="grp-genero">
         <label class="opt"><input type="radio" name="genero" value="Mujer"><span>Mujer</span></label>
         <label class="opt"><input type="radio" name="genero" value="Hombre"><span>Hombre</span></label>
         <label class="opt"><input type="radio" name="genero" value="Otro"><span>Otro</span></label>
@@ -144,7 +176,7 @@
       </fieldset>
 
       <label class="field-label">¿Qué tan religioso/a te consideras? (1 = nada, 5 = muy)</label>
-      <div class="scale">
+      <div class="scale" id="grp-relig">
         <label><input type="radio" name="relig" value="1"><span>1</span></label>
         <label><input type="radio" name="relig" value="2"><span>2</span></label>
         <label><input type="radio" name="relig" value="3"><span>3</span></label>
@@ -154,7 +186,7 @@
       <div class="scale-caps"><span>Nada</span><span>Muy</span></div>
 
       <label class="field-label" style="margin-top:16px;">¿Practicas una religión?</label>
-      <fieldset>
+      <fieldset id="grp-practica">
         <label class="opt"><input type="radio" name="practica" value="Sí"><span>Sí</span></label>
         <label class="opt"><input type="radio" name="practica" value="No"><span>No</span></label>
       </fieldset>
@@ -179,15 +211,12 @@
 
 <script>
   // ------------------------------------------------------------------
-  // Backend de datos: Web3Forms (https://web3forms.com). Un único formulario
-  // compartido por los módulos -- cada envío manda { access_key, modulo,
-  // payload_json } como JSON.
+  // Backend de datos: Web3Forms (https://web3forms.com).
   // ------------------------------------------------------------------
   const WEB3FORMS_CONFIG = {
     accessKey: "582d6f36-2057-4a24-9bfd-ab66651942de"
   };
 
-  // Respaldo local: solo se usa si el envío al servidor falla.
   function downloadBackup(modulo, data){
     try{
       const headers = Object.keys(data);
@@ -210,100 +239,21 @@
     }
   }
 
-  // Efecto marco (Tversky & Kahneman, 1981, "Asian disease problem"): el
-  // mismo problema, descrito en términos de ganancia o de pérdida, cambia
-  // la disposición a arriesgarse. 5 dominios distintos, marco (ganancia/
-  // pérdida) asignado al azar por ítem, orden de presentación aleatorio --
-  // misma lógica que la versión anterior de este módulo, para ver si el
-  // efecto decae con la repetición.
-  const ITEMS = [
-    {
-      id: 'salud', dominio: 'una enfermedad que amenaza a 600 personas',
-      unidad: 'personas',
-      ganancia: 'Un brote de una enfermedad amenaza a 600 personas. Con el <b>Programa A</b>, se salvarán con certeza 200 personas. Con el <b>Programa B</b>, hay 1/3 de probabilidad de salvar a las 600 personas y 2/3 de no salvar a nadie.',
-      perdida: 'Un brote de una enfermedad amenaza a 600 personas. Con el <b>Programa A</b>, morirán con certeza 400 personas. Con el <b>Programa B</b>, hay 1/3 de probabilidad de que no muera nadie y 2/3 de que mueran las 600 personas.',
-      opciones: ['Programa A (certeza)', 'Programa B (probabilidad)']
-    },
-    {
-      id: 'empleos', dominio: 'una empresa con 600 empleos en riesgo',
-      unidad: 'empleos',
-      ganancia: 'Una empresa en crisis tiene 600 empleos en riesgo. Con el <b>Plan A</b>, se salvarán con certeza 200 empleos. Con el <b>Plan B</b>, hay 1/3 de probabilidad de salvar los 600 empleos y 2/3 de no salvar ninguno.',
-      perdida: 'Una empresa en crisis tiene 600 empleos en riesgo. Con el <b>Plan A</b>, se perderán con certeza 400 empleos. Con el <b>Plan B</b>, hay 1/3 de probabilidad de no perder ningún empleo y 2/3 de perder los 600.',
-      opciones: ['Plan A (certeza)', 'Plan B (probabilidad)']
-    },
-    {
-      id: 'bosque', dominio: 'un incendio que amenaza 600 hectáreas de bosque nativo',
-      unidad: 'hectáreas',
-      ganancia: 'Un incendio amenaza 600 hectáreas de bosque nativo. Con el <b>Plan A</b>, se protegerán con certeza 200 hectáreas. Con el <b>Plan B</b>, hay 1/3 de probabilidad de proteger las 600 hectáreas y 2/3 de no proteger ninguna.',
-      perdida: 'Un incendio amenaza 600 hectáreas de bosque nativo. Con el <b>Plan A</b>, se perderán con certeza 400 hectáreas. Con el <b>Plan B</b>, hay 1/3 de probabilidad de no perder ninguna hectárea y 2/3 de perder las 600.',
-      opciones: ['Plan A (certeza)', 'Plan B (probabilidad)']
-    },
-    {
-      id: 'inversion', dominio: 'un fondo de inversión con $600 millones en juego',
-      unidad: 'millones',
-      ganancia: 'Un fondo de inversión tiene $600 millones en juego. Con la <b>Estrategia A</b>, se asegurarán con certeza $200 millones. Con la <b>Estrategia B</b>, hay 1/3 de probabilidad de asegurar los $600 millones y 2/3 de no asegurar nada.',
-      perdida: 'Un fondo de inversión tiene $600 millones en juego. Con la <b>Estrategia A</b>, se perderán con certeza $400 millones. Con la <b>Estrategia B</b>, hay 1/3 de probabilidad de no perder nada y 2/3 de perder los $600 millones.',
-      opciones: ['Estrategia A (certeza)', 'Estrategia B (probabilidad)']
-    },
-    {
-      id: 'estudiantes', dominio: '600 estudiantes en riesgo de reprobar el año',
-      unidad: 'estudiantes',
-      ganancia: 'En un colegio, 600 estudiantes están en riesgo de reprobar el año. Con el <b>Programa A</b>, aprobarán con certeza 200 estudiantes. Con el <b>Programa B</b>, hay 1/3 de probabilidad de que aprueben los 600 y 2/3 de que no apruebe ninguno.',
-      perdida: 'En un colegio, 600 estudiantes están en riesgo de reprobar el año. Con el <b>Programa A</b>, reprobarán con certeza 400 estudiantes. Con el <b>Programa B</b>, hay 1/3 de probabilidad de que no repruebe nadie y 2/3 de que reprueben los 600.',
-      opciones: ['Programa A (certeza)', 'Programa B (probabilidad)']
-    },
-  ];
-
-  function shuffle(arr){
-    const a = arr.slice();
-    for (let i = a.length - 1; i > 0; i--){
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
-
-  // Orden de presentación aleatorio + marco (ganancia/pérdida) independiente por ítem.
-  const order = shuffle(ITEMS).map((item, idx) => {
-    const perdida = Math.random() < 0.5;
-    return {
-      item: item.id,
-      frame: perdida ? 'perdida' : 'ganancia',
-      position: idx + 1,
-      _texto: perdida ? item.perdida : item.ganancia,
-      _opciones: item.opciones,
-    };
-  });
-
-  const container = document.getElementById('item-steps');
-  order.forEach((row, i) => {
-    const n = i + 1;
-    const div = document.createElement('div');
-    div.className = 'step';
-    div.dataset.step = String(n);
-    div.innerHTML = `
-      <div class="dots" id="dots-${n}"></div>
-      <div class="card">
-        <div class="eyebrow" style="margin-bottom:8px;">Paso ${n} de 5</div>
-        <h1>¿Qué opción eliges?</h1>
-        <div class="vignette">${row._texto}</div>
-        <fieldset>
-          <label class="opt"><input type="radio" name="eleccion-${n}" value="A"><span>${row._opciones[0]}</span></label>
-          <label class="opt"><input type="radio" name="eleccion-${n}" value="B"><span>${row._opciones[1]}</span></label>
-        </fieldset>
-        <div class="err" id="err-${n}">Elige una opción para continuar.</div>
-        <div class="nav">
-          <button class="btn-ghost" data-back>Atrás</button>
-          <button class="btn-primary" data-next="${n}">Continuar</button>
-        </div>
-      </div>`;
-    container.appendChild(div);
-  });
+  // Juego del ultimátum (Güth, Schmittberger & Schwarze, 1982): oferta
+  // asignada al azar -- justa (5/5) o injusta (2/8) -- sobre 10 lucas.
+  // Clásico: la gente rechaza ofertas injustas aunque eso signifique
+  // quedarse sin nada, violando el interés propio puramente racional.
+  const esJusta = Math.random() < 0.5;
+  const tuya = esJusta ? 5 : 2;
+  const otro = 10 - tuya;
+  document.getElementById('amt-tuya').textContent = tuya + ' lucas';
+  document.getElementById('amt-otro').textContent = otro + ' lucas';
 
   const state = { step: 0 };
-  function steps(){ return Array.from(document.querySelectorAll('.step')); }
+  const steps = Array.from(document.querySelectorAll('.step'));
+
   function showStep(n){
-    steps().forEach(s => s.classList.toggle('active', s.dataset.step === String(n)));
+    steps.forEach(s => s.classList.toggle('active', s.dataset.step === String(n)));
     state.step = n;
     if (typeof n === 'number' && n > 0) renderDots(n);
     window.scrollTo({top:0, behavior:'instant'});
@@ -312,7 +262,7 @@
     const el = document.getElementById('dots-' + n);
     if(!el) return;
     el.innerHTML = '';
-    for(let i=1;i<=6;i++){
+    for(let i=1;i<=2;i++){
       const d = document.createElement('div');
       d.className = 'dot' + (i <= n ? ' done' : '');
       el.appendChild(d);
@@ -324,28 +274,29 @@
   });
   document.getElementById('btn-start').addEventListener('click', () => showStep(1));
 
-  document.addEventListener('click', e => {
-    if (e.target.matches('[data-back]')) showStep(Math.max(0, state.step - 1));
-  });
+  document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => {
+    showStep(Math.max(0, state.step - 1));
+  }));
 
-  document.addEventListener('change', e => {
-    if (e.target.matches('input[type=radio]')){
-      document.querySelectorAll('input[name="' + e.target.name + '"]').forEach(sib => {
+  document.querySelectorAll('.opt input, .scale input').forEach(inp => {
+    inp.addEventListener('change', () => {
+      document.querySelectorAll('input[name="' + inp.name + '"]').forEach(sib => {
         const wrap = sib.closest('.opt') || sib.closest('label');
         if (wrap) wrap.classList.toggle('checked', sib.checked);
       });
-    }
+    });
   });
 
-  document.addEventListener('click', e => {
-    const btn = e.target.closest('[data-next]');
-    if (!btn) return;
-    const n = Number(btn.dataset.next);
-    const el = document.querySelector('input[name="eleccion-'+n+'"]:checked');
-    document.getElementById('err-' + n).style.display = el ? 'none' : 'block';
-    if (!el) return;
-    order[n-1].eleccion = el.value;
-    showStep(n + 1);
+  function next(from){
+    if (from === 1){
+      const ok = !!document.querySelector('input[name="decision"]:checked');
+      document.getElementById('err-decision').style.display = ok ? 'none' : 'block';
+      if (!ok) return;
+    }
+    showStep(from + 1);
+  }
+  document.querySelectorAll('[data-next]').forEach(b => {
+    b.addEventListener('click', () => next(Number(b.dataset.next)));
   });
 
   function radioVal(name){
@@ -362,10 +313,10 @@
     }
     document.getElementById('err-demo').style.display = 'none';
 
-    const items_out = order.map(({item, frame, position, eleccion}) => ({item, frame, position, eleccion}));
-
     const data = {
-      items_json: JSON.stringify(items_out),
+      oferta: esJusta ? 'justa' : 'injusta',
+      monto_propio_lucas: tuya,
+      decision: radioVal('decision'),
       edad_rango: edad,
       genero: genero,
       religiosidad: relig,
@@ -383,7 +334,7 @@
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
           access_key: WEB3FORMS_CONFIG.accessKey,
-          modulo: 'B',
+          modulo: 'D',
           payload_json: JSON.stringify(data)
         })
       });
@@ -395,7 +346,7 @@
     }
 
     if (!ok){
-      downloadBackup('B', data);
+      downloadBackup('D', data);
       document.getElementById('done-stamp').textContent = '⚠ No se pudo enviar';
       document.getElementById('done-stamp').classList.add('warn');
       document.getElementById('done-title').textContent = 'Se descargó tu copia local';
