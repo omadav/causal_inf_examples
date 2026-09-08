@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Módulo A · El precio arbitrario</title>
+<title>Módulo A · Vender o comprar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -60,10 +60,6 @@
   }
   .item-card b{color:var(--ink); font-weight:600;}
   label.field-label{display:block; font-size:14px; font-weight:600; margin:0 0 8px;}
-  .price-preview{
-    font-family:'IBM Plex Mono',monospace; font-size:40px; font-weight:600;
-    color:var(--accent-ink); margin:6px 0 16px; letter-spacing:.02em;
-  }
   input[type=number], input[type=text]{
     width:100%; font-family:'IBM Plex Mono',monospace; font-size:20px;
     padding:13px 14px; border-radius:10px; border:1.5px solid var(--line);
@@ -121,8 +117,8 @@
   <!-- STEP 0: consent -->
   <div class="step active" data-step="0">
     <div class="card">
-      <h1>El precio arbitrario</h1>
-      <p class="soft">Anónimo, 2 minutos. No pedimos tu nombre ni tu RUT completo.</p>
+      <h1>Vender o comprar</h1>
+      <p class="soft">Anónimo, 2 minutos. Vas a imaginar que tienes (o no tienes) un objeto, y vas a decir cuánto vale.</p>
       <label class="consent-row">
         <input type="checkbox" id="consent-check">
         <span>Entiendo y quiero participar en este ejercicio.</span>
@@ -133,16 +129,17 @@
     </div>
   </div>
 
-  <!-- STEP 1: RUT digits -->
+  <!-- STEP 1: rol (vendedor/comprador, asignado al azar) + valoración -->
   <div class="step" data-step="1">
     <div class="dots" id="dots-1"></div>
     <div class="card">
-      <div class="eyebrow" style="margin-bottom:8px;">Paso 1 de 4</div>
-      <h1>Tus dos últimos dígitos</h1>
-      <p>Escribe los <b>dos últimos dígitos de tu RUT</b> (antes del guión), como si fueran un precio en <b>lucas</b>.</p>
-      <div class="price-preview" id="price-preview">&mdash;&mdash; lucas</div>
-      <input type="number" inputmode="numeric" min="0" max="99" placeholder="Ej: 37" id="input-rut">
-      <div class="err" id="err-rut">Ingresa un número de 0 a 99.</div>
+      <div class="eyebrow" style="margin-bottom:8px;">Paso 1 de 2</div>
+      <h1>¿Cuánto vale?</h1>
+      <div class="item-card"><b>Parlante bluetooth portátil</b>, genérico, sin marca reconocible.</div>
+      <p id="vignette-text"></p>
+      <label class="field-label" id="question-text"></label>
+      <div class="clp-wrap"><input type="number" inputmode="numeric" min="0" placeholder="Ej: 15" id="input-valor"><span class="suffix">lucas</span></div>
+      <div class="err" id="err-valor">Ingresa un monto en lucas.</div>
       <div class="nav">
         <button class="btn-ghost" data-back>Atrás</button>
         <button class="btn-primary" data-next="1">Continuar</button>
@@ -150,45 +147,11 @@
     </div>
   </div>
 
-  <!-- STEP 2: WTP wine -->
+  <!-- STEP 2: demographics -->
   <div class="step" data-step="2">
     <div class="dots" id="dots-2"></div>
     <div class="card">
-      <div class="eyebrow" style="margin-bottom:8px;">Paso 2 de 4</div>
-      <h1>¿Cuánto pagarías?</h1>
-      <div class="item-card"><b>Botella de vino</b> tinto, reserva, 750&nbsp;ml, sin marca reconocible.</div>
-      <p>Sin cambiar el número que escribiste antes: ¿cuál es el <b>máximo</b> que pagarías por esta botella, en lucas?</p>
-      <div class="clp-wrap"><input type="number" inputmode="numeric" min="0" placeholder="Ej: 15" id="input-wine"><span class="suffix">lucas</span></div>
-      <div class="err" id="err-wine">Ingresa un monto en lucas.</div>
-      <div class="nav">
-        <button class="btn-ghost" data-back>Atrás</button>
-        <button class="btn-primary" data-next="2">Continuar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- STEP 3: WTP earbuds -->
-  <div class="step" data-step="3">
-    <div class="dots" id="dots-3"></div>
-    <div class="card">
-      <div class="eyebrow" style="margin-bottom:8px;">Paso 3 de 4</div>
-      <h1>¿Cuánto pagarías?</h1>
-      <div class="item-card"><b>Audífonos inalámbricos</b> bluetooth, genéricos, sin marca reconocible.</div>
-      <p>¿Cuál es el <b>máximo</b> que pagarías por estos audífonos, en lucas?</p>
-      <div class="clp-wrap"><input type="number" inputmode="numeric" min="0" placeholder="Ej: 15" id="input-earbuds"><span class="suffix">lucas</span></div>
-      <div class="err" id="err-earbuds">Ingresa un monto en lucas.</div>
-      <div class="nav">
-        <button class="btn-ghost" data-back>Atrás</button>
-        <button class="btn-primary" data-next="3">Continuar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- STEP 4: demographics -->
-  <div class="step" data-step="4">
-    <div class="dots" id="dots-4"></div>
-    <div class="card">
-      <div class="eyebrow" style="margin-bottom:8px;">Paso 4 de 4</div>
+      <div class="eyebrow" style="margin-bottom:8px;">Paso 2 de 2</div>
       <h1>Un poco sobre ti</h1>
       <p class="soft">Últimas preguntas — nos sirven para comparar grupos en clase.</p>
 
@@ -255,9 +218,9 @@
   };
 
   // Respaldo local: guarda la respuesta como un CSV en el dispositivo del
-  // estudiante, sin depender de que Google Forms acepte el envío. No agrega
-  // datos de otros estudiantes -- es solo una copia de "esto es lo que yo
-  // respondí", por si el envío al formulario falla en silencio.
+  // estudiante, sin depender de que el envío al formulario funcione. No
+  // agrega datos de otros estudiantes -- es solo una copia de "esto es lo
+  // que yo respondí", por si el envío falla en silencio.
   function downloadBackup(modulo, data){
     try{
       const headers = Object.keys(data);
@@ -280,7 +243,26 @@
     }
   }
 
-  const state = { step: 0, order: [0,1,2,3,4] };
+  // Efecto dotación (Kahneman, Knetsch & Thaler, 1990): asignación al azar,
+  // entre sujetos -- cada estudiante es vendedor/a O comprador/a, nunca
+  // ambos (si contestara las dos, la segunda respuesta quedaría anclada
+  // por la primera y se perdería la comparación).
+  const ROLES = {
+    vendedor: {
+      vignette: 'Imagina que te ganaste este parlante en una rifa del curso. <b>Ya es tuyo.</b>',
+      question: '¿Cuál es el mínimo por el que lo venderías?'
+    },
+    comprador: {
+      vignette: 'Imagina que un compañero se ganó este parlante en una rifa del curso y te lo quiere vender. <b>Todavía no es tuyo.</b>',
+      question: '¿Cuál es el máximo que pagarías por él?'
+    }
+  };
+  const roleKey = Math.random() < 0.5 ? 'vendedor' : 'comprador';
+  const role = ROLES[roleKey];
+  document.getElementById('vignette-text').innerHTML = role.vignette;
+  document.getElementById('question-text').textContent = role.question;
+
+  const state = { step: 0 };
   const steps = Array.from(document.querySelectorAll('.step'));
 
   function showStep(n){
@@ -293,7 +275,7 @@
     const el = document.getElementById('dots-' + n);
     if(!el) return;
     el.innerHTML = '';
-    for(let i=1;i<=4;i++){
+    for(let i=1;i<=2;i++){
       const d = document.createElement('div');
       d.className = 'dot' + (i <= n ? ' done' : '');
       el.appendChild(d);
@@ -309,13 +291,6 @@
     showStep(Math.max(0, state.step - 1));
   }));
 
-  const rutInput = document.getElementById('input-rut');
-  rutInput.addEventListener('input', () => {
-    const v = rutInput.value;
-    document.getElementById('price-preview').textContent =
-      (v === '' ? '——' : v) + ' lucas';
-  });
-
   document.querySelectorAll('.opt input, .scale input').forEach(inp => {
     inp.addEventListener('change', () => {
       document.querySelectorAll('input[name="' + inp.name + '"]').forEach(sib => {
@@ -327,21 +302,9 @@
 
   function next(from){
     if (from === 1){
-      const v = Number(rutInput.value);
-      const ok = rutInput.value !== '' && v >= 0 && v <= 99 && Number.isInteger(v);
-      document.getElementById('err-rut').style.display = ok ? 'none' : 'block';
-      if(!ok) return;
-    }
-    if (from === 2){
-      const v = document.getElementById('input-wine').value;
+      const v = document.getElementById('input-valor').value;
       const ok = v !== '' && Number(v) >= 0;
-      document.getElementById('err-wine').style.display = ok ? 'none' : 'block';
-      if(!ok) return;
-    }
-    if (from === 3){
-      const v = document.getElementById('input-earbuds').value;
-      const ok = v !== '' && Number(v) >= 0;
-      document.getElementById('err-earbuds').style.display = ok ? 'none' : 'block';
+      document.getElementById('err-valor').style.display = ok ? 'none' : 'block';
       if(!ok) return;
     }
     showStep(from + 1);
@@ -365,9 +328,8 @@
     document.getElementById('err-demo').style.display = 'none';
 
     const data = {
-      rut_digitos: rutInput.value.padStart(2,'0'),
-      wtp_vino_lucas: document.getElementById('input-wine').value,
-      wtp_audifonos_lucas: document.getElementById('input-earbuds').value,
+      rol: roleKey,
+      valor_lucas: document.getElementById('input-valor').value,
       edad_rango: edad,
       genero: genero,
       religiosidad: relig,
