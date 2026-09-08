@@ -340,8 +340,6 @@
     const btn = document.getElementById('btn-submit');
     btn.disabled = true; btn.textContent = 'Enviando…';
 
-    downloadBackup('A', data);
-
     let ok = false;
     try{
       const res = await fetch('https://api.web3forms.com/submit', {
@@ -361,6 +359,8 @@
     }
 
     if (!ok){
+      // Solo se descarga una copia local si el envío al servidor falló.
+      downloadBackup('A', data);
       document.getElementById('done-stamp').textContent = '⚠ No se pudo enviar';
       document.getElementById('done-stamp').classList.add('warn');
       document.getElementById('done-title').textContent = 'Se descargó tu copia local';
