@@ -17,11 +17,22 @@ investigación distintas — y A, C y D muestran explícitamente que un mismo
 tratamiento puede tener efectos heterogéneos según el subgrupo (género en
 A y D, género/religiosidad/personalidad en C).
 
+**Un solo link:** `docs/flow.html` encadena los 4 módulos en un único
+flujo secuencial (A → B → C → D) y pide las preguntas demográficas una
+sola vez, al final, en vez de 4 veces. Es la opción recomendada para
+proyectar en clase. Por debajo sigue mandando 4 envíos independientes a
+Web3Forms (uno por módulo, `modulo: 'A'|'B'|'C'|'D'`) que comparten un
+mismo `submission_id` y las mismas demográficas — así el CSV exportado y
+`session.ipynb` funcionan exactamente igual que si cada módulo se hubiera
+respondido por separado. Las 4 páginas individuales (`module-a.html` …
+`module-d.html`) siguen disponibles como alternativa/respaldo.
+
 ## Estructura
 
 ```
 docs/
-  index.html                 landing con los 4 módulos
+  index.html                 landing: link único (flow.html) + los 4 módulos por separado
+  flow.html                   los 4 módulos en un solo flujo secuencial (recomendado)
   module-a.html               Módulo A (efecto dotación: vendedor/comprador)
   module-b.html               Módulo B (efecto marco: 5 dilemas ganancia/pérdida)
   module-c.html               Módulo C (tranvía + heterogeneidad)

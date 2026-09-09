@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cuatro experimentos · Flujo único</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F2F1EC; --panel:#FFFFFF; --panel-2:#FAFAF6;
+    --ink:#20241F; --ink-soft:#5B6058; --line:#DBDBCF;
+    --accent:#3D4F5C; --accent-ink:#22303A; --accent-contrast:#FFFFFF;
+    --danger:#A23B2E; --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14171A; --panel:#1B1F23; --panel-2:#20252A;
+      --ink:#EAEDEA; --ink-soft:#9CA6A0; --line:#2B3237;
+      --accent:#7FA0B8; --accent-ink:#E4EEF5; --accent-contrast:#0D1417;
+      --danger:#E08A79;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14171A; --panel:#1B1F23; --panel-2:#20252A;
+    --ink:#EAEDEA; --ink-soft:#9CA6A0; --line:#2B3237;
+    --accent:#7FA0B8; --accent-ink:#E4EEF5; --accent-contrast:#0D1417;
+    --danger:#E08A79;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'Public Sans',-apple-system,'Segoe UI',sans-serif;
+    display:flex; justify-content:center; padding:28px 14px 56px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .stage{width:100%; max-width:520px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--accent-ink); font-weight:600;
+  }
+  .rule{height:2px; background:var(--accent); width:38px; margin:10px 0 18px; border-radius:2px;}
+  .progress-wrap{margin-bottom:20px;}
+  .progress-bar{height:5px; background:var(--line); border-radius:3px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--accent); border-radius:3px; transition:width .25s ease; width:0%;}
+  .progress-label{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft); margin-top:6px;}
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:26px 22px 20px; box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  h1{
+    font-family:'Fraunces',Georgia,serif; font-weight:600; font-size:27px;
+    line-height:1.15; margin:0 0 12px; text-wrap:balance;
+  }
+  p{margin:0 0 14px; line-height:1.55; color:var(--ink);}
+  p.soft{color:var(--ink-soft); font-size:14.5px;}
+  .vignette, .item-card{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:10px;
+    padding:15px 16px; margin-bottom:16px; font-size:15px; line-height:1.6; color:var(--ink-soft);
+  }
+  .vignette b, .item-card b{color:var(--ink); font-weight:600;}
+  .split-row{display:flex; gap:10px; margin-bottom:16px;}
+  .split-tile{
+    flex:1; text-align:center; background:var(--panel-2); border:1px solid var(--line);
+    border-radius:10px; padding:14px 8px;
+  }
+  .split-tile .amt{font-family:'IBM Plex Mono',monospace; font-size:24px; font-weight:600; color:var(--accent-ink);}
+  .split-tile .who{font-size:12px; color:var(--ink-soft); margin-top:4px;}
+  label.field-label{display:block; font-size:14px; font-weight:600; margin:0 0 8px;}
+  input[type=number], input[type=text]{
+    width:100%; font-family:'IBM Plex Mono',monospace; font-size:20px;
+    padding:13px 14px; border-radius:10px; border:1.5px solid var(--line);
+    background:var(--panel); color:var(--ink); outline:none;
+  }
+  input:focus{border-color:var(--accent);}
+  .clp-wrap{position:relative;}
+  .clp-wrap .suffix{
+    position:absolute; right:14px; top:50%; transform:translateY(-50%);
+    font-family:'IBM Plex Mono',monospace; color:var(--ink-soft); font-size:16px;
+  }
+  .clp-wrap input{padding-right:66px;}
+  fieldset{border:none; padding:0; margin:0 0 8px;}
+  .opt{
+    display:flex; align-items:center; gap:10px; padding:11px 12px;
+    border:1.5px solid var(--line); border-radius:10px; margin-bottom:8px; cursor:pointer;
+  }
+  .opt input{width:16px; height:16px; accent-color:var(--accent); margin:0;}
+  .opt.checked{border-color:var(--accent); background:var(--panel-2);}
+  .scale, .scale7{display:flex; gap:6px;}
+  .scale7{gap:4px;}
+  .scale label, .scale7 label{
+    flex:1; text-align:center; border:1.5px solid var(--line); border-radius:8px;
+    padding:10px 0; font-family:'IBM Plex Mono',monospace; font-size:15px; cursor:pointer;
+  }
+  .scale7 label{padding:9px 0; font-size:13px; border-radius:7px;}
+  .scale input, .scale7 input{position:absolute; opacity:0; pointer-events:none;}
+  .scale label.checked, .scale7 label.checked{border-color:var(--accent); background:var(--accent); color:var(--accent-contrast);}
+  .scale-caps{display:flex; justify-content:space-between; font-size:11.5px; color:var(--ink-soft); margin-top:6px;}
+  .tipi-item{margin-bottom:18px;}
+  .tipi-item p{margin-bottom:8px; font-size:14.5px;}
+  .consent-row{display:flex; gap:10px; align-items:flex-start; margin:18px 0 6px; cursor:pointer;}
+  .consent-row input{margin-top:3px; width:17px; height:17px; accent-color:var(--accent);}
+  .nav{display:flex; justify-content:space-between; align-items:center; margin-top:22px;}
+  button{
+    font-family:'Public Sans',sans-serif; font-weight:600; font-size:15px;
+    border-radius:10px; padding:12px 20px; border:1.5px solid transparent; cursor:pointer;
+  }
+  .btn-primary{background:var(--accent); color:var(--accent-contrast);}
+  .btn-primary:disabled{opacity:.4; cursor:not-allowed;}
+  .btn-ghost{background:transparent; color:var(--ink-soft); border-color:var(--line);}
+  .step{display:none;}
+  .step.active{display:block;}
+  .done-screen{text-align:center; padding:30px 6px;}
+  .stamp{
+    display:inline-flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace;
+    font-size:13px; font-weight:600; letter-spacing:.06em; color:var(--accent-ink);
+    border:1.5px solid var(--accent); border-radius:999px; padding:6px 14px; margin-bottom:18px;
+  }
+  .stamp.warn{ color:var(--danger); border-color:var(--danger); }
+  .err{color:var(--danger); font-size:13px; margin-top:-2px; margin-bottom:12px; display:none;}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="eyebrow">Curso · Inferencia causal</div>
+  <div class="rule"></div>
+  <div class="progress-wrap" id="progress-wrap" hidden>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-label" id="progress-label"></div>
+  </div>
+
+  <!-- STEP 0: consent -->
+  <div class="step active" data-step="0">
+    <div class="card">
+      <h1>Cuatro experimentos</h1>
+      <p class="soft">Anónimo, ~8 minutos. Vas a pasar por 4 ejercicios cortos, uno tras otro, y al final unas preguntas sobre ti. No hay respuestas correctas o incorrectas.</p>
+      <label class="consent-row">
+        <input type="checkbox" id="consent-check">
+        <span>Entiendo y quiero participar en este ejercicio.</span>
+      </label>
+      <div class="nav" style="justify-content:flex-end;">
+        <button class="btn-primary" id="btn-start" disabled>Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1: Módulo A -->
+  <div class="step" data-step="1">
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:8px;">Parte 1 de 4 · Vender o comprar</div>
+      <h1>¿Cuánto vale?</h1>
+      <div class="item-card"><b>Parlante bluetooth portátil</b>, genérico, sin marca reconocible.</div>
+      <p id="a-vignette-text"></p>
+      <label class="field-label" id="a-question-text"></label>
+      <div class="clp-wrap"><input type="number" inputmode="numeric" min="0" placeholder="Ej: 15" id="a-input-valor"><span class="suffix">lucas</span></div>
+      <div class="err" id="a-err-valor">Ingresa un monto en lucas.</div>
+      <div class="nav">
+        <button class="btn-ghost" data-back>Atrás</button>
+        <button class="btn-primary" data-next="1">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEPS 2-6: Módulo B (5 ítems, inyectados por JS) -->
+  <div id="b-item-steps"></div>
+
+  <!-- STEP 7: Módulo C - trolley -->
+  <div class="step" data-step="7">
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:8px;">Parte 2 de 4 · El dilema y tú</div>
+      <h1>El dilema</h1>
+      <div class="vignette" id="c-vignette-text"></div>
+      <label class="field-label" id="c-question-text"></label>
+      <div class="scale7" id="c-accept-scale">
+        <label><input type="radio" name="c-accept" value="1"><span>1</span></label>
+        <label><input type="radio" name="c-accept" value="2"><span>2</span></label>
+        <label><input type="radio" name="c-accept" value="3"><span>3</span></label>
+        <label><input type="radio" name="c-accept" value="4"><span>4</span></label>
+        <label><input type="radio" name="c-accept" value="5"><span>5</span></label>
+        <label><input type="radio" name="c-accept" value="6"><span>6</span></label>
+        <label><input type="radio" name="c-accept" value="7"><span>7</span></label>
+      </div>
+      <div class="scale-caps"><span>Totalmente inaceptable</span><span>Totalmente aceptable</span></div>
+      <div class="err" id="c-err-accept" style="margin-top:12px;">Elige un valor de 1 a 7.</div>
+      <div class="nav">
+        <button class="btn-ghost" data-back>Atrás</button>
+        <button class="btn-primary" data-next="7">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 8: Módulo C - TIPI-10 -->
+  <div class="step" data-step="8">
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:8px;">Parte 2 de 4 · Cómo te describes</div>
+      <h1>Cómo te describes</h1>
+      <p class="soft">Me veo a mí mismo/a como alguien que es… (1 = muy en desacuerdo, 7 = muy de acuerdo)</p>
+      <div id="tipi-list"></div>
+      <div class="err" id="err-tipi">Responde las 10 frases para continuar.</div>
+      <div class="nav">
+        <button class="btn-ghost" data-back>Atrás</button>
+        <button class="btn-primary" data-next="8">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 9: Módulo D -->
+  <div class="step" data-step="9">
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:8px;">Parte 3 de 4 · Aceptar o rechazar</div>
+      <h1>Te ofrecen un reparto</h1>
+      <p>Un compañero del curso, elegido al azar, tiene <b>10 lucas</b> para repartir entre él/ella y tú. Te hace la siguiente oferta:</p>
+      <div class="split-row">
+        <div class="split-tile"><div class="amt" id="d-amt-tuya">—</div><div class="who">Para ti</div></div>
+        <div class="split-tile"><div class="amt" id="d-amt-otro">—</div><div class="who">Para tu compañero/a</div></div>
+      </div>
+      <p class="soft">Si rechazas la oferta, <b>ninguno de los dos</b> recibe nada.</p>
+      <label class="field-label">¿Aceptarías esta oferta?</label>
+      <fieldset>
+        <label class="opt"><input type="radio" name="d-decision" value="Acepta"><span>Sí, la acepto</span></label>
+        <label class="opt"><input type="radio" name="d-decision" value="Rechaza"><span>No, la rechazo</span></label>
+      </fieldset>
+      <div class="err" id="d-err-decision">Elige una opción para continuar.</div>
+      <div class="nav">
+        <button class="btn-ghost" data-back>Atrás</button>
+        <button class="btn-primary" data-next="9">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 10: demographics (compartidas por los 4 módulos) -->
+  <div class="step" data-step="10">
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:8px;">Parte 4 de 4 · Sobre ti</div>
+      <h1>Un poco sobre ti</h1>
+      <p class="soft">Últimas preguntas — nos sirven para comparar grupos en clase.</p>
+
+      <label class="field-label">Edad</label>
+      <fieldset>
+        <label class="opt"><input type="radio" name="edad" value="<20"><span>Menos de 20</span></label>
+        <label class="opt"><input type="radio" name="edad" value="20-24"><span>20–24</span></label>
+        <label class="opt"><input type="radio" name="edad" value="25-29"><span>25–29</span></label>
+        <label class="opt"><input type="radio" name="edad" value="30-39"><span>30–39</span></label>
+        <label class="opt"><input type="radio" name="edad" value="40+"><span>40 o más</span></label>
+      </fieldset>
+
+      <label class="field-label">Género</label>
+      <fieldset>
+        <label class="opt"><input type="radio" name="genero" value="Mujer"><span>Mujer</span></label>
+        <label class="opt"><input type="radio" name="genero" value="Hombre"><span>Hombre</span></label>
+        <label class="opt"><input type="radio" name="genero" value="Otro"><span>Otro</span></label>
+        <label class="opt"><input type="radio" name="genero" value="Prefiero no decirlo"><span>Prefiero no decirlo</span></label>
+      </fieldset>
+
+      <label class="field-label">¿Qué tan religioso/a te consideras? (1 = nada, 5 = muy)</label>
+      <div class="scale">
+        <label><input type="radio" name="relig" value="1"><span>1</span></label>
+        <label><input type="radio" name="relig" value="2"><span>2</span></label>
+        <label><input type="radio" name="relig" value="3"><span>3</span></label>
+        <label><input type="radio" name="relig" value="4"><span>4</span></label>
+        <label><input type="radio" name="relig" value="5"><span>5</span></label>
+      </div>
+      <div class="scale-caps"><span>Nada</span><span>Muy</span></div>
+
+      <label class="field-label" style="margin-top:16px;">¿Practicas una religión?</label>
+      <fieldset>
+        <label class="opt"><input type="radio" name="practica" value="Sí"><span>Sí</span></label>
+        <label class="opt"><input type="radio" name="practica" value="No"><span>No</span></label>
+      </fieldset>
+      <div class="err" id="err-demo">Responde las cuatro preguntas para continuar.</div>
+
+      <div class="nav">
+        <button class="btn-ghost" data-back>Atrás</button>
+        <button class="btn-primary" id="btn-submit">Enviar respuestas</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DONE -->
+  <div class="step" data-step="done">
+    <div class="card done-screen">
+      <div class="stamp" id="done-stamp">✓ Registrado</div>
+      <h1 style="font-size:22px;" id="done-title">Gracias por participar</h1>
+      <p class="soft" id="done-text">Tus respuestas se sumaron a las del curso. Vamos a analizarlas juntos en unos minutos.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ------------------------------------------------------------------
+  // Backend de datos: Web3Forms (https://web3forms.com). Este flujo único
+  // recorre los 4 módulos en orden y, al final, manda 4 envíos separados
+  // (uno por módulo, con modulo:'A'|'B'|'C'|'D') -- así el CSV exportado y
+  // el notebook de análisis siguen funcionando exactamente igual que con
+  // las páginas individuales. Los 4 envíos comparten un mismo
+  // submission_id y las mismas demográficas (pedidas una sola vez al final,
+  // en vez de 4 veces).
+  // ------------------------------------------------------------------
+  const WEB3FORMS_CONFIG = {
+    accessKey: "582d6f36-2057-4a24-9bfd-ab66651942de"
+  };
+
+  function downloadBackup(modulo, data){
+    try{
+      const headers = Object.keys(data);
+      const esc = v => {
+        const s = String(v);
+        return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+      };
+      const csv = headers.join(',') + '\n' + headers.map(h => esc(data[h])).join(',') + '\n';
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `modulo-${modulo}-${data.submission_id || Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    } catch(e){
+      console.error('No se pudo generar el respaldo CSV', e);
+    }
+  }
+
+  const submissionId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random();
+
+  // ---- Módulo A: efecto dotación (Kahneman, Knetsch & Thaler, 1990) ----
+  const A_ROLES = {
+    vendedor: {
+      vignette: 'Imagina que te ganaste este parlante en una rifa del curso. <b>Ya es tuyo.</b>',
+      question: '¿Cuál es el mínimo por el que lo venderías?'
+    },
+    comprador: {
+      vignette: 'Imagina que un compañero se ganó este parlante en una rifa del curso y te lo quiere vender. <b>Todavía no es tuyo.</b>',
+      question: '¿Cuál es el máximo que pagarías por él?'
+    }
+  };
+  const aRoleKey = Math.random() < 0.5 ? 'vendedor' : 'comprador';
+  const aRole = A_ROLES[aRoleKey];
+  document.getElementById('a-vignette-text').innerHTML = aRole.vignette;
+  document.getElementById('a-question-text').textContent = aRole.question;
+
+  // ---- Módulo B: efecto marco (Tversky & Kahneman, 1981) ----
+  const B_ITEMS = [
+    {
+      id: 'salud',
+      ganancia: 'Un brote de una enfermedad amenaza a 600 personas. Con el <b>Programa A</b>, se salvarán con certeza 200 personas. Con el <b>Programa B</b>, hay 1/3 de probabilidad de salvar a las 600 personas y 2/3 de no salvar a nadie.',
+      perdida: 'Un brote de una enfermedad amenaza a 600 personas. Con el <b>Programa A</b>, morirán con certeza 400 personas. Con el <b>Programa B</b>, hay 1/3 de probabilidad de que no muera nadie y 2/3 de que mueran las 600 personas.',
+      opciones: ['Programa A (certeza)', 'Programa B (probabilidad)']
+    },
+    {
+      id: 'empleos',
+      ganancia: 'Una empresa en crisis tiene 600 empleos en riesgo. Con el <b>Plan A</b>, se salvarán con certeza 200 empleos. Con el <b>Plan B</b>, hay 1/3 de probabilidad de salvar los 600 empleos y 2/3 de no salvar ninguno.',
+      perdida: 'Una empresa en crisis tiene 600 empleos en riesgo. Con el <b>Plan A</b>, se perderán con certeza 400 empleos. Con el <b>Plan B</b>, hay 1/3 de probabilidad de no perder ningún empleo y 2/3 de perder los 600.',
+      opciones: ['Plan A (certeza)', 'Plan B (probabilidad)']
+    },
+    {
+      id: 'bosque',
+      ganancia: 'Un incendio amenaza 600 hectáreas de bosque nativo. Con el <b>Plan A</b>, se protegerán con certeza 200 hectáreas. Con el <b>Plan B</b>, hay 1/3 de probabilidad de proteger las 600 hectáreas y 2/3 de no proteger ninguna.',
+      perdida: 'Un incendio amenaza 600 hectáreas de bosque nativo. Con el <b>Plan A</b>, se perderán con certeza 400 hectáreas. Con el <b>Plan B</b>, hay 1/3 de probabilidad de no perder ninguna hectárea y 2/3 de perder las 600.',
+      opciones: ['Plan A (certeza)', 'Plan B (probabilidad)']
+    },
+    {
+      id: 'inversion',
+      ganancia: 'Un fondo de inversión tiene $600 millones en juego. Con la <b>Estrategia A</b>, se asegurarán con certeza $200 millones. Con la <b>Estrategia B</b>, hay 1/3 de probabilidad de asegurar los $600 millones y 2/3 de no asegurar nada.',
+      perdida: 'Un fondo de inversión tiene $600 millones en juego. Con la <b>Estrategia A</b>, se perderán con certeza $400 millones. Con la <b>Estrategia B</b>, hay 1/3 de probabilidad de no perder nada y 2/3 de perder los $600 millones.',
+      opciones: ['Estrategia A (certeza)', 'Estrategia B (probabilidad)']
+    },
+    {
+      id: 'estudiantes',
+      ganancia: 'En un colegio, 600 estudiantes están en riesgo de reprobar el año. Con el <b>Programa A</b>, aprobarán con certeza 200 estudiantes. Con el <b>Programa B</b>, hay 1/3 de probabilidad de que aprueben los 600 y 2/3 de que no apruebe ninguno.',
+      perdida: 'En un colegio, 600 estudiantes están en riesgo de reprobar el año. Con el <b>Programa A</b>, reprobarán con certeza 400 estudiantes. Con el <b>Programa B</b>, hay 1/3 de probabilidad de que no repruebe nadie y 2/3 de que reprueben los 600.',
+      opciones: ['Programa A (certeza)', 'Programa B (probabilidad)']
+    },
+  ];
+  function shuffle(arr){
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  const bOrder = shuffle(B_ITEMS).map((item, idx) => {
+    const perdida = Math.random() < 0.5;
+    return {
+      item: item.id,
+      frame: perdida ? 'perdida' : 'ganancia',
+      position: idx + 1,
+      _texto: perdida ? item.perdida : item.ganancia,
+      _opciones: item.opciones,
+    };
+  });
+  const bContainer = document.getElementById('b-item-steps');
+  bOrder.forEach((row, i) => {
+    const n = i + 2; // steps 2..6
+    const div = document.createElement('div');
+    div.className = 'step';
+    div.dataset.step = String(n);
+    div.innerHTML = `
+      <div class="card">
+        <div class="eyebrow" style="margin-bottom:8px;">Parte 1 de 4 · Ganar o perder (${i + 1}/5)</div>
+        <h1>¿Qué opción eliges?</h1>
+        <div class="vignette">${row._texto}</div>
+        <fieldset>
+          <label class="opt"><input type="radio" name="b-eleccion-${n}" value="A"><span>${row._opciones[0]}</span></label>
+          <label class="opt"><input type="radio" name="b-eleccion-${n}" value="B"><span>${row._opciones[1]}</span></label>
+        </fieldset>
+        <div class="err" id="b-err-${n}">Elige una opción para continuar.</div>
+        <div class="nav">
+          <button class="btn-ghost" data-back>Atrás</button>
+          <button class="btn-primary" data-next="${n}">Continuar</button>
+        </div>
+      </div>`;
+    bContainer.appendChild(div);
+  });
+
+  // ---- Módulo C: tranvía (Greene et al.) + TIPI-10 (Gosling et al. 2003) ----
+  const C_VARIANTS = {
+    switch: {
+      vignette: 'Un tranvía fuera de control se dirige hacia 5 personas que están en la vía y morirán si no haces nada. Estás junto a una palanca: si la jalas, el tranvía se desviará a una vía secundaria, donde matará a 1 persona en lugar de 5.',
+      question: '¿Es moralmente aceptable jalar la palanca?'
+    },
+    push: {
+      vignette: 'Un tranvía fuera de control se dirige hacia 5 personas que morirán si no haces nada. Estás en un puente sobre la vía, junto a un desconocido muy corpulento. La única forma de detener el tranvía es empujar a esta persona hacia la vía: morirá, pero su cuerpo detendrá el tranvía y salvará a las 5 personas.',
+      question: '¿Es moralmente aceptable empujar a esta persona?'
+    }
+  };
+  const cVariantKey = Math.random() < 0.5 ? 'switch' : 'push';
+  const cVariant = C_VARIANTS[cVariantKey];
+  document.getElementById('c-vignette-text').textContent = cVariant.vignette;
+  document.getElementById('c-question-text').textContent = cVariant.question;
+
+  const TIPI = [
+    { text:'Extrovertido/a, entusiasta.', trait:'extraversion', r:false },
+    { text:'Crítico/a, propenso/a a discutir.', trait:'amabilidad', r:true },
+    { text:'Confiable, autodisciplinado/a.', trait:'meticulosidad', r:false },
+    { text:'Ansioso/a, se altera con facilidad.', trait:'estabilidad_emocional', r:true },
+    { text:'Abierto/a a nuevas experiencias, complejo/a.', trait:'apertura', r:false },
+    { text:'Reservado/a, tranquilo/a.', trait:'extraversion', r:true },
+    { text:'Compasivo/a, de buen corazón.', trait:'amabilidad', r:false },
+    { text:'Desorganizado/a, descuidado/a.', trait:'meticulosidad', r:true },
+    { text:'Calmado/a, emocionalmente estable.', trait:'estabilidad_emocional', r:false },
+    { text:'Convencional/a, poco creativo/a.', trait:'apertura', r:true },
+  ];
+  const tipiList = document.getElementById('tipi-list');
+  TIPI.forEach((row, i) => {
+    const n = i + 1;
+    const div = document.createElement('div');
+    div.className = 'tipi-item';
+    div.innerHTML = `
+      <p>${n}. ${row.text}</p>
+      <div class="scale7">
+        ${[1,2,3,4,5,6,7].map(v => `<label><input type="radio" name="tipi-${n}" value="${v}"><span>${v}</span></label>`).join('')}
+      </div>`;
+    tipiList.appendChild(div);
+  });
+
+  // ---- Módulo D: juego del ultimátum (Güth, Schmittberger & Schwarze, 1982) ----
+  const dEsJusta = Math.random() < 0.5;
+  const dTuya = dEsJusta ? 5 : 2;
+  const dOtro = 10 - dTuya;
+  document.getElementById('d-amt-tuya').textContent = dTuya + ' lucas';
+  document.getElementById('d-amt-otro').textContent = dOtro + ' lucas';
+
+  // ---- Navegación ----
+  const TOTAL_STEPS = 10;
+  const state = { step: 0 };
+  function steps(){ return Array.from(document.querySelectorAll('.step')); }
+  function showStep(n){
+    steps().forEach(s => s.classList.toggle('active', s.dataset.step === String(n)));
+    state.step = n;
+    const wrap = document.getElementById('progress-wrap');
+    if (typeof n === 'number' && n >= 1){
+      wrap.hidden = false;
+      document.getElementById('progress-fill').style.width = (n / TOTAL_STEPS * 100) + '%';
+      document.getElementById('progress-label').textContent = `Paso ${n} de ${TOTAL_STEPS}`;
+    } else {
+      wrap.hidden = true;
+    }
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+
+  document.getElementById('consent-check').addEventListener('change', e => {
+    document.getElementById('btn-start').disabled = !e.target.checked;
+  });
+  document.getElementById('btn-start').addEventListener('click', () => showStep(1));
+
+  document.addEventListener('click', e => {
+    if (e.target.matches('[data-back]')) showStep(Math.max(0, state.step - 1));
+  });
+
+  document.addEventListener('change', e => {
+    if (e.target.matches('input[type=radio]')){
+      document.querySelectorAll('input[name="' + e.target.name + '"]').forEach(sib => {
+        const wrap = sib.closest('.opt') || sib.closest('label');
+        if (wrap) wrap.classList.toggle('checked', sib.checked);
+      });
+    }
+  });
+
+  function radioVal(name){
+    const el = document.querySelector('input[name="'+name+'"]:checked');
+    return el ? el.value : null;
+  }
+
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-next]');
+    if (!btn) return;
+    const n = Number(btn.dataset.next);
+
+    if (n === 1){
+      const v = document.getElementById('a-input-valor').value;
+      const ok = v !== '' && Number(v) >= 0;
+      document.getElementById('a-err-valor').style.display = ok ? 'none' : 'block';
+      if (!ok) return;
+    } else if (n >= 2 && n <= 6){
+      const el = document.querySelector('input[name="b-eleccion-'+n+'"]:checked');
+      document.getElementById('b-err-' + n).style.display = el ? 'none' : 'block';
+      if (!el) return;
+      bOrder[n - 2].eleccion = el.value;
+    } else if (n === 7){
+      const v = radioVal('c-accept');
+      document.getElementById('c-err-accept').style.display = v ? 'none' : 'block';
+      if (!v) return;
+    } else if (n === 8){
+      const tipiOk = TIPI.every((row, i) => radioVal('tipi-' + (i + 1)));
+      document.getElementById('err-tipi').style.display = tipiOk ? 'none' : 'block';
+      if (!tipiOk) return;
+    } else if (n === 9){
+      const ok = !!radioVal('d-decision');
+      document.getElementById('d-err-decision').style.display = ok ? 'none' : 'block';
+      if (!ok) return;
+    }
+    showStep(n + 1);
+  });
+
+  async function submitOne(modulo, data){
+    let ok = false;
+    try{
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_CONFIG.accessKey,
+          modulo: modulo,
+          payload_json: JSON.stringify(data)
+        })
+      });
+      const result = await res.json();
+      ok = res.ok && result.success;
+      if (!ok) console.error('Web3Forms rechazó el envío del módulo ' + modulo, result);
+    } catch(e){
+      console.error('Error al enviar el módulo ' + modulo, e);
+    }
+    if (!ok) downloadBackup(modulo, data);
+    return ok;
+  }
+
+  document.getElementById('btn-submit').addEventListener('click', async () => {
+    const edad = radioVal('edad'), genero = radioVal('genero'),
+          relig = radioVal('relig'), practica = radioVal('practica');
+    if (!edad || !genero || !relig || !practica){
+      document.getElementById('err-demo').style.display = 'block';
+      return;
+    }
+    document.getElementById('err-demo').style.display = 'none';
+
+    const demo = { edad_rango: edad, genero: genero, religiosidad: relig, practica_religion: practica };
+
+    const dataA = {
+      rol: aRoleKey,
+      valor_lucas: document.getElementById('a-input-valor').value,
+      ...demo,
+      submission_id: submissionId
+    };
+    const bItemsOut = bOrder.map(({item, frame, position, eleccion}) => ({item, frame, position, eleccion}));
+    const dataB = {
+      items_json: JSON.stringify(bItemsOut),
+      ...demo,
+      submission_id: submissionId
+    };
+    const tipiAnswers = TIPI.map(row => ({ trait: row.trait, r: row.r, value: Number(radioVal('tipi-' + (TIPI.indexOf(row) + 1))) }));
+    const dataC = {
+      variante: cVariantKey,
+      aceptabilidad: radioVal('c-accept'),
+      genero: genero,
+      religiosidad: relig,
+      practica_religion: practica,
+      tipi_json: JSON.stringify(tipiAnswers),
+      submission_id: submissionId
+    };
+    const dataD = {
+      oferta: dEsJusta ? 'justa' : 'injusta',
+      monto_propio_lucas: dTuya,
+      decision: radioVal('d-decision'),
+      ...demo,
+      submission_id: submissionId
+    };
+
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true;
+
+    const results = [];
+    for (const [modulo, data] of [['A', dataA], ['B', dataB], ['C', dataC], ['D', dataD]]){
+      btn.textContent = `Enviando… (${results.length + 1}/4)`;
+      results.push(await submitOne(modulo, data));
+    }
+    const allOk = results.every(Boolean);
+
+    if (!allOk){
+      document.getElementById('done-stamp').textContent = '⚠ Algunos envíos fallaron';
+      document.getElementById('done-stamp').classList.add('warn');
+      document.getElementById('done-title').textContent = 'Se descargaron copias locales';
+      document.getElementById('done-text').textContent = 'No pudimos confirmar el envío de una o más partes al servidor, pero se guardaron como archivos CSV en tu dispositivo. Avísale a tu profesor.';
+    }
+    showStep('done');
+  });
+</script>
+</body>
+</html>
