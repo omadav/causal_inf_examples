@@ -51,5 +51,5 @@ estudiante como respaldo.
 - [x] GitHub Pages activo sobre esta rama, carpeta `/docs`
 - [x] Backend de datos (Web3Forms) probado de punta a punta con respuestas reales
 - [x] Notebook de análisis en vivo (balance, ATE, CATE) — probado con datos simulados y con datos reales
-- [ ] Módulo D todavía sin respuestas reales ni sección de análisis en `session.ipynb`
+- [x] Módulo D con su propia sección de análisis en `session.ipynb` (descriptivo, ATE, balance, heterogeneidad por género) — probado con datos simulados; todavía sin respuestas reales
 - [ ] Correr con toda la clase
