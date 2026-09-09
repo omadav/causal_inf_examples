@@ -536,6 +536,8 @@
     showStep(n + 1);
   });
 
+  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
   async function submitOne(modulo, data){
     let ok = false;
     try{
@@ -602,9 +604,19 @@
     const btn = document.getElementById('btn-submit');
     btn.disabled = true;
 
+    // Los 4 envíos se espacian en el tiempo a propósito: mandarlos en una
+    // ráfaga de <2 segundos (como pasaba antes) hace que el filtro
+    // antispam de Web3Forms marque los últimos como spam aunque la API
+    // responda success:true -- el envío se "pierde" en silencio y ni
+    // siquiera muestra la pantalla de advertencia. Con ~1.2s de espera
+    // entre cada uno, el patrón se parece al de alguien completando 4
+    // páginas separadas en vez de un bot.
     const results = [];
-    for (const [modulo, data] of [['A', dataA], ['B', dataB], ['C', dataC], ['D', dataD]]){
-      btn.textContent = `Enviando… (${results.length + 1}/4)`;
+    const submissions = [['A', dataA], ['B', dataB], ['C', dataC], ['D', dataD]];
+    for (let i = 0; i < submissions.length; i++){
+      if (i > 0) await sleep(1100 + Math.random() * 500);
+      const [modulo, data] = submissions[i];
+      btn.textContent = `Enviando… (${i + 1}/4)`;
       results.push(await submitOne(modulo, data));
     }
     const allOk = results.every(Boolean);
