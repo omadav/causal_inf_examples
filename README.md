@@ -20,12 +20,17 @@ A y D, género/religiosidad/personalidad en C).
 **Un solo link:** `docs/flow.html` encadena los 4 módulos en un único
 flujo secuencial (A → B → C → D) y pide las preguntas demográficas una
 sola vez, al final, en vez de 4 veces. Es la opción recomendada para
-proyectar en clase. Por debajo sigue mandando 4 envíos independientes a
-Web3Forms (uno por módulo, `modulo: 'A'|'B'|'C'|'D'`) que comparten un
-mismo `submission_id` y las mismas demográficas — así el CSV exportado y
-`session.ipynb` funcionan exactamente igual que si cada módulo se hubiera
-respondido por separado. Las 4 páginas individuales (`module-a.html` …
-`module-d.html`) siguen disponibles como alternativa/respaldo.
+proyectar en clase. Por debajo manda **un solo envío** a Web3Forms con los
+4 módulos como campos separados (`payload_a_json` … `payload_d_json`,
+`modulo: 'FLOW'`) — probamos primero mandar 4 POSTs independientes como
+hacen las páginas individuales, pero el filtro antispam de Web3Forms
+terminaba marcando los últimos como spam (la API igual respondía
+`success: true`, y el dato se perdía en silencio). Un solo envío por
+persona evita ese problema de raíz. `session.ipynb` sabe leer ambos
+formatos (ver `docs/DATA_BACKEND.md`), así que el CSV exportado funciona
+igual sin importar si una respuesta vino de `flow.html` o de una página
+individual. Las 4 páginas individuales (`module-a.html` … `module-d.html`)
+siguen disponibles como alternativa/respaldo.
 
 ## Estructura
 

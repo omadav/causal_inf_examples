@@ -536,27 +536,31 @@
     showStep(n + 1);
   });
 
-  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
-
-  async function submitOne(modulo, data){
+  // Un solo POST con los 4 módulos como campos separados (payload_a_json..
+  // payload_d_json), en vez de 4 envíos independientes. Probamos primero
+  // espaciar los 4 envíos en el tiempo (~1.2s entre cada uno) para evitar
+  // el filtro antispam de Web3Forms, pero igual marcó el último como spam
+  // -- así que el límite no es "ráfaga de milisegundos" sino "cantidad de
+  // envíos por visitante" en una ventana más larga. Mandar todo en un único
+  // envío es exactamente el caso de uso normal de un formulario (una
+  // persona, un envío) y no debería activar ese filtro.
+  async function submitAll(rows){
     let ok = false;
     try{
+      const body = { access_key: WEB3FORMS_CONFIG.accessKey, modulo: 'FLOW' };
+      for (const [modulo, data] of rows) body['payload_' + modulo.toLowerCase() + '_json'] = JSON.stringify(data);
       const res = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({
-          access_key: WEB3FORMS_CONFIG.accessKey,
-          modulo: modulo,
-          payload_json: JSON.stringify(data)
-        })
+        body: JSON.stringify(body)
       });
       const result = await res.json();
       ok = res.ok && result.success;
-      if (!ok) console.error('Web3Forms rechazó el envío del módulo ' + modulo, result);
+      if (!ok) console.error('Web3Forms rechazó el envío', result);
     } catch(e){
-      console.error('Error al enviar el módulo ' + modulo, e);
+      console.error('Error al enviar', e);
     }
-    if (!ok) downloadBackup(modulo, data);
+    if (!ok) rows.forEach(([modulo, data]) => downloadBackup(modulo, data));
     return ok;
   }
 
@@ -603,29 +607,15 @@
 
     const btn = document.getElementById('btn-submit');
     btn.disabled = true;
+    btn.textContent = 'Enviando…';
 
-    // Los 4 envíos se espacian en el tiempo a propósito: mandarlos en una
-    // ráfaga de <2 segundos (como pasaba antes) hace que el filtro
-    // antispam de Web3Forms marque los últimos como spam aunque la API
-    // responda success:true -- el envío se "pierde" en silencio y ni
-    // siquiera muestra la pantalla de advertencia. Con ~1.2s de espera
-    // entre cada uno, el patrón se parece al de alguien completando 4
-    // páginas separadas en vez de un bot.
-    const results = [];
-    const submissions = [['A', dataA], ['B', dataB], ['C', dataC], ['D', dataD]];
-    for (let i = 0; i < submissions.length; i++){
-      if (i > 0) await sleep(1100 + Math.random() * 500);
-      const [modulo, data] = submissions[i];
-      btn.textContent = `Enviando… (${i + 1}/4)`;
-      results.push(await submitOne(modulo, data));
-    }
-    const allOk = results.every(Boolean);
+    const ok = await submitAll([['A', dataA], ['B', dataB], ['C', dataC], ['D', dataD]]);
 
-    if (!allOk){
-      document.getElementById('done-stamp').textContent = '⚠ Algunos envíos fallaron';
+    if (!ok){
+      document.getElementById('done-stamp').textContent = '⚠ No se pudo enviar';
       document.getElementById('done-stamp').classList.add('warn');
-      document.getElementById('done-title').textContent = 'Se descargaron copias locales';
-      document.getElementById('done-text').textContent = 'No pudimos confirmar el envío de una o más partes al servidor, pero se guardaron como archivos CSV en tu dispositivo. Avísale a tu profesor.';
+      document.getElementById('done-title').textContent = 'Se descargó tu copia local';
+      document.getElementById('done-text').textContent = 'No pudimos confirmar el envío al servidor, pero tus respuestas se guardaron como archivos CSV en tu dispositivo. Avísale a tu profesor.';
     }
     showStep('done');
   });
