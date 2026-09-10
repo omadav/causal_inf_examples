@@ -44,9 +44,15 @@ docs/
   module-d.html                Módulo D (juego del ultimátum)
   DATA_BACKEND.md             cómo funciona el backend de datos (Web3Forms)
 analysis/
-  session.ipynb               notebook para correr en clase (balance, ATE, CATE)
+  session.ipynb               notebook en Python para correr en clase (balance, ATE, CATE)
   requirements.txt            pip install -r analysis/requirements.txt
   data/                       responses.csv (exportado de Web3Forms antes de la clase; nunca se commitea)
+analysis-r/
+  session.Rmd                 notebook en R: primero transforma el CSV a formato largo
+                               (respuestas_long.csv, personalidad_long.csv), después se va
+                               extendiendo en vivo con los gráficos/regresiones que se pidan
+  install_packages.R          instala los paquetes de R que usa el notebook
+  data/                       mismo responses.csv de analysis/data/ (nunca se commitea)
 ```
 
 `session.ipynb` corre hoy mismo con datos simulados (`SIMULATE = True`,

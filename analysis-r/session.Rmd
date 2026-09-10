@@ -1,0 +1,247 @@
+---
+title: "Inferencia causal en vivo -- análisis en R"
+output: html_notebook
+---
+
+Este notebook lee el CSV exportado del dashboard de Web3Forms (ver
+`docs/DATA_BACKEND.md`) y lo transforma a **formato largo**, listo para
+`dplyr`/`ggplot2`. Cada módulo (A, B, C, D) es un experimento aleatorizado
+distinto, así que el formato largo usa columnas genéricas
+`treatment`/`outcome` para poder filtrar, graficar y hacer regresiones con
+el mismo código en los 4 módulos, en vez de reescribirlo cada vez.
+
+Soporta los dos formatos de envío que puede tener el CSV exportado (ver
+`docs/DATA_BACKEND.md`):
+
+- **Individual** (`module-a.html` … `module-d.html`): una fila por módulo,
+  columna `Modulo` en `A|B|C|D` + columna `Payload Json`.
+- **Combinado** (`flow.html`, recomendado): una fila por persona,
+  `Modulo == 'FLOW'` + columnas `Payload A Json` … `Payload D Json`.
+
+## Setup
+
+```{r setup}
+library(readr)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(jsonlite)
+library(stringr)
+library(ggplot2)
+
+`%||%` <- function(a, b) if (is.null(a) || length(a) == 0 || (length(a) == 1 && is.na(a))) b else a
+
+RESPONSES_CSV <- "data/responses.csv"
+```
+
+## Cargar el CSV crudo
+
+Poné el CSV exportado de Web3Forms en `analysis-r/data/responses.csv`
+(nunca se commitea -- ver `data/.gitignore`).
+
+```{r load-raw}
+snake_names <- function(df) {
+  names(df) <- names(df) |> str_trim() |> str_to_lower() |> str_replace_all(" ", "_")
+  df
+}
+
+raw <- read_csv(RESPONSES_CSV, col_types = cols(.default = col_character())) |>
+  snake_names()
+
+cat(nrow(raw), "filas crudas leídas de", RESPONSES_CSV, "\n")
+```
+
+## Funciones de transformación
+
+```{r transform-helpers}
+# Junta las dos fuentes posibles para un módulo dado: filas individuales
+# (Modulo == letra + payload_json) y filas combinadas de flow.html
+# (payload_<letra>_json). Devuelve una lista de payloads ya parseados
+# (uno por persona) más su Submitted At, para que cada extractor de
+# módulo no tenga que saber de dónde vino la fila.
+parse_module_sources <- function(raw, modulo) {
+  m <- tolower(modulo)
+  sources <- list()
+
+  if (all(c("modulo", "payload_json") %in% names(raw))) {
+    ind <- raw |> filter(toupper(modulo) == toupper(!!modulo), !is.na(payload_json))
+    if (nrow(ind) > 0) {
+      sources[["individual"]] <- list(
+        payload = map(ind$payload_json, ~ tryCatch(fromJSON(.x), error = function(e) NULL)),
+        submitted_at = ind$submitted_at
+      )
+    }
+  }
+
+  combined_col <- paste0("payload_", m, "_json")
+  if (combined_col %in% names(raw)) {
+    comb <- raw |> filter(!is.na(.data[[combined_col]]))
+    if (nrow(comb) > 0) {
+      sources[["combined"]] <- list(
+        payload = map(comb[[combined_col]], ~ tryCatch(fromJSON(.x), error = function(e) NULL)),
+        submitted_at = comb$submitted_at
+      )
+    }
+  }
+  sources
+}
+
+# Corre un extractor (una función por módulo, ver abajo) sobre todas las
+# fuentes disponibles para ese módulo y junta el resultado en una sola tabla.
+build_module_long <- function(raw, modulo, extractor) {
+  sources <- parse_module_sources(raw, modulo)
+  parts <- map(sources, ~ extractor(.x$payload, .x$submitted_at))
+  parts <- parts[map_int(parts, nrow) > 0]
+  if (length(parts) == 0) return(tibble())
+  bind_rows(parts)
+}
+```
+
+## Extractores por módulo
+
+Cada uno recibe la lista de payloads ya parseados (uno por persona) y
+devuelve filas en el esquema largo común:
+`submission_id, modulo, item, treatment_var, treatment, outcome_var,
+outcome, outcome_num, monto_propio_lucas, position, edad_rango, genero,
+religiosidad, practica_religion, submitted_at`.
+
+`item` distingue observaciones repetidas dentro de un módulo (Módulo B
+tiene 5 ítems por persona); para los módulos de una sola decisión (A, C, D)
+vale `1`.
+
+Las filas con esquema viejo (de los módulos originales de anclaje /
+RUT, antes del rediseño) no tienen los campos nuevos (`rol`, `frame`) y se
+descartan en silencio -- se cuentan al final.
+
+```{r extractors}
+extract_a <- function(payloads, submitted_at) {
+  map2_dfr(payloads, submitted_at, function(p, ts) {
+    if (is.null(p) || is.null(p$rol)) return(tibble())  # esquema viejo (RUT/SSN), se descarta
+    tibble(
+      submission_id = p$submission_id %||% NA_character_,
+      modulo = "A", item = "1",
+      treatment_var = "rol", treatment = p$rol,
+      outcome_var = "valor_lucas", outcome = as.character(p$valor_lucas %||% NA),
+      monto_propio_lucas = NA_real_, position = NA_integer_,
+      edad_rango = p$edad_rango %||% NA_character_,
+      genero = p$genero %||% NA_character_,
+      religiosidad = p$religiosidad %||% NA_character_,
+      practica_religion = p$practica_religion %||% NA_character_,
+      submitted_at = ts
+    )
+  })
+}
+
+extract_b <- function(payloads, submitted_at) {
+  map2_dfr(payloads, submitted_at, function(p, ts) {
+    if (is.null(p) || is.null(p$items_json)) return(tibble())
+    items <- tryCatch(fromJSON(p$items_json), error = function(e) NULL)
+    if (is.null(items) || !all(c("frame", "eleccion", "position") %in% names(items))) {
+      return(tibble())  # esquema viejo (anclaje Gandhi/Neruda), se descarta
+    }
+    tibble(
+      submission_id = p$submission_id %||% NA_character_,
+      modulo = "B", item = items$item,
+      treatment_var = "frame", treatment = items$frame,
+      outcome_var = "eleccion", outcome = items$eleccion,
+      monto_propio_lucas = NA_real_, position = items$position,
+      edad_rango = p$edad_rango %||% NA_character_,
+      genero = p$genero %||% NA_character_,
+      religiosidad = p$religiosidad %||% NA_character_,
+      practica_religion = p$practica_religion %||% NA_character_,
+      submitted_at = ts
+    )
+  })
+}
+
+extract_c <- function(payloads, submitted_at) {
+  map2_dfr(payloads, submitted_at, function(p, ts) {
+    if (is.null(p) || is.null(p$variante)) return(tibble())
+    tibble(
+      submission_id = p$submission_id %||% NA_character_,
+      modulo = "C", item = "1",
+      treatment_var = "variante", treatment = p$variante,
+      outcome_var = "aceptabilidad", outcome = as.character(p$aceptabilidad %||% NA),
+      monto_propio_lucas = NA_real_, position = NA_integer_,
+      edad_rango = NA_character_,  # el módulo C nunca preguntó edad
+      genero = p$genero %||% NA_character_,
+      religiosidad = p$religiosidad %||% NA_character_,
+      practica_religion = p$practica_religion %||% NA_character_,
+      submitted_at = ts
+    )
+  })
+}
+
+extract_d <- function(payloads, submitted_at) {
+  map2_dfr(payloads, submitted_at, function(p, ts) {
+    if (is.null(p) || is.null(p$oferta)) return(tibble())
+    tibble(
+      submission_id = p$submission_id %||% NA_character_,
+      modulo = "D", item = "1",
+      treatment_var = "oferta", treatment = p$oferta,
+      outcome_var = "decision", outcome = p$decision %||% NA_character_,
+      monto_propio_lucas = as.numeric(p$monto_propio_lucas %||% NA),
+      position = NA_integer_,
+      edad_rango = p$edad_rango %||% NA_character_,
+      genero = p$genero %||% NA_character_,
+      religiosidad = p$religiosidad %||% NA_character_,
+      practica_religion = p$practica_religion %||% NA_character_,
+      submitted_at = ts
+    )
+  })
+}
+
+# TIPI-10 (Módulo C) es una covariable de personalidad, no parte del
+# tratamiento/resultado -- va en su propia tabla larga.
+extract_tipi <- function(payloads, submitted_at) {
+  map2_dfr(payloads, submitted_at, function(p, ts) {
+    if (is.null(p) || is.null(p$tipi_json)) return(tibble())
+    tipi <- tryCatch(fromJSON(p$tipi_json), error = function(e) NULL)
+    if (is.null(tipi) || !all(c("trait", "r", "value") %in% names(tipi))) return(tibble())
+    tibble(
+      submission_id = p$submission_id %||% NA_character_,
+      trait = tipi$trait, r = tipi$r, value = tipi$value,
+      submitted_at = ts
+    )
+  })
+}
+```
+
+## Correr la transformación
+
+```{r run-transform}
+long_a <- build_module_long(raw, "A", extract_a)
+long_b <- build_module_long(raw, "B", extract_b)
+long_c <- build_module_long(raw, "C", extract_c)
+long_d <- build_module_long(raw, "D", extract_d)
+
+respuestas_long <- bind_rows(long_a, long_b, long_c, long_d) |>
+  mutate(outcome_num = suppressWarnings(as.numeric(outcome)))
+
+personalidad_long <- build_module_long(raw, "C", extract_tipi)
+
+write_csv(respuestas_long, "data/respuestas_long.csv")
+write_csv(personalidad_long, "data/personalidad_long.csv")
+
+cat("respuestas_long.csv --", nrow(respuestas_long), "filas\n")
+respuestas_long |> count(modulo, name = "filas") |> print()
+cat("\npersonalidad_long.csv --", nrow(personalidad_long), "filas",
+    "(", n_distinct(personalidad_long$submission_id), "personas x 10 rasgos )\n")
+```
+
+## Vista previa
+
+```{r preview}
+respuestas_long |> group_by(modulo) |> slice_head(n = 2) |> ungroup() |> as.data.frame()
+```
+
+```{r preview-tipi}
+head(personalidad_long, 10) |> as.data.frame()
+```
+
+---
+
+*A partir de acá se van a ir agregando los gráficos y regresiones que se
+pidan en vivo durante la clase (descriptivos, ATE, balance, CATE por
+módulo) -- este notebook se extiende con cada pedido en vez de
+recalcularse desde cero.*
